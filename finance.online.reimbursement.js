@@ -11,7 +11,7 @@
 // ==/UserScript==
 
 
-//finance.Online.reimbursement
+//finance.online.reimbursement
 (function() {
     'use strict';
 
