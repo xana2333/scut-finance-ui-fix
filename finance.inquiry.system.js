@@ -37,6 +37,8 @@
         console.log("Fixed width restrictions removed for .main and .width classes.");
 
         // 使用 GM_addStyle注入自定义CSS规则，用于加宽“经费情况”、“我的工资”、“来款信息”行，解决它在高分辨率显示器下的错位问题
+        // 并非完美解决，只解决了3840*2160+175%情况下的错位问题。如果分辨率更高，偷懒的方法就是继续改大width: 1100px。
+        // 完美解决方案Todo
         GM_addStyle(`
         #pro, #pro_1 {
             width: 1100px !important; /* 覆盖原始的 1000px */
