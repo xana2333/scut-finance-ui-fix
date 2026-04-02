@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-财务查询
-// @namespace    http://tampermonkey.net/
+// @namespace    http://github.com/xana2333/scut-finance-ui-fix
 // @version      1.3
 // @description  解决查询系统首页大分辨率情况下UI错位、经费信息需要横向移动才能查看的问题
 // @author       XANA
 // @match        http://202.38.194.48:8182/*
 // @match        https://202.38.194.48:8182/*
+// @match        http://202-38-194-48-8182.webvpn.scut.edu.cn/*
+// @match        https://202-38-194-48-8182.webvpn.scut.edu.cn/*
 // @grant        GM_addStyle
 // ==/UserScript==
 
@@ -13,30 +15,32 @@
 (function() {
     'use strict';
 
+    //获取当前URL
     const currentUrl = window.location.href;
-    console.log("currentUrl",currentUrl)
-
     // 获取当前窗口的视口宽度（包含滚动条）
     let window_width = window.innerWidth;
     console.log("Url"+currentUrl+" 当前宽度为: " + window_width + "px");
 
-    if (currentUrl.includes('202.38.194.48:8182/')) {
+    //处理财务查询系统首页UI错位、首页经费表格，UI太窄不便于操作问题
+    if (currentUrl.includes('202.38.194.48:8182/') || currentUrl.includes('02-38-194-48-8182.webvpn.scut.edu.cn/')) {
 
         // 使用 GM_addStyle 注入自定义CSS规则，解决首页经费表格太宽，但是容器窗口太小的问题。
         // 这会覆盖 .main 类的 width: 980px;
         GM_addStyle(`
         .main {
-            width: auto !important; /* 或者可以使用百分比, 如 100%, 但 auto 通常更灵活 */
-            max-width: none !important; /* 移除可能存在的最大宽度限制 */
-            margin-left: auto !important; /* 保持居中或根据需要调整 */
-            margin-right: auto !important; /* 保持居中或根据需要调整 */
+            min-width: 980px !important; //增加最小宽度（与原来保持一致），避免它过小带来新问题
+            width: auto !important; // 或者可以使用百分比, 如 100%, 但 auto 通常更灵活 
+            max-width: none !important; // 移除可能存在的最大宽度限制
+            margin-left: auto !important; // 保持居中或根据需要调整
+            margin-right: auto !important; // 保持居中或根据需要调整
         }
         `);
         // 这会覆盖 .width 类的 width: 960px;
         GM_addStyle(`
         .width {
-            width: 100% !important; /* 改为占据其容器的100%宽度 */
-            max-width: none !important; /* 移除可能存在的最大宽度限制 */
+            min-width: 960px !important; //增加最小宽度（与原来保持一致），避免它过小带来新问题
+            width: 100% !important; // 改为占据其容器的100%宽度
+            max-width: none !important; // 移除可能存在的最大宽度限制
         }
         `);
         console.log("Fixed width restrictions removed for .main and .width classes.");
