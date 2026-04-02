@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         SCUT财务处UI优化-网上报账
+// @name         SCUT财务系统UI优化-网上报账
 // @namespace    http://tampermonkey.net/
 // @version      1.5
 // @description  移除指定div的高度限制，让内容自适应；优化iframe高度
