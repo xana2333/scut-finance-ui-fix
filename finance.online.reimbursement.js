@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账
 // @namespace    http://tampermonkey.net/
-// @version      1.5
+// @version      1.6
 // @description  移除指定div的高度限制，让内容自适应；优化iframe高度
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/*
@@ -29,6 +29,48 @@
         // 将iframe高度从900px修改为1050px
         iframeElement.style.height = newHeight;
         console.log("已设置iframe id="+iframeElement.id+'的height: '+newHeight);
+    }
+
+    // 获得iframe对象宽高的函数
+    function getIframeSize(iframe) {
+        if (!iframe || iframe.tagName !== 'IFRAME') {
+            throw new Error('传入的元素不是 iframe');
+        }
+
+        try {
+            // 尝试获取内部文档的高度和宽度
+            // 注意：如果是跨域 iframe，此处会报错进入 catch
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            if (doc && doc.body) {
+                const height = doc.body.scrollHeight;
+                const width = doc.body.scrollWidth;
+
+                return {
+                    width: width,
+                    height: height,
+                    isCrossOrigin: false,
+                    success: height > 0
+                };
+            } else {
+                // 文档未完全加载或 body 不存在
+                return {
+                    width: iframe.offsetWidth,
+                    height: iframe.offsetHeight,
+                    isCrossOrigin: false,
+                    success: false,
+                    reason: 'iframe 内容未完全加载'
+                };
+            }
+        } catch (e) {
+            // 跨域情况，只能获取 iframe 标签本身的尺寸
+            return {
+                width: iframe.offsetWidth,
+                height: iframe.offsetHeight,
+                isCrossOrigin: true,
+                success: true,
+                reason: '跨域限制，仅能获取标签占位尺寸'
+            };
+        }
     }
 
 
@@ -225,13 +267,19 @@
             mutation.addedNodes.forEach(function(node) {
                 if (node.nodeType === 1) {
                     if (node.id === 'ctl00_ContentPlaceHolder1_fm_wx' && node.tagName.toLowerCase() === 'iframe') {
-                        adj_Iframe_Height(node,"1050px");
+                        const sizeInfo = getIframeSize(node);
+                        const newIframeHeight=sizeInfo.height+50;
+                        //console.log(newIframeHeight+"px");
+                        adj_Iframe_Height(node,newIframeHeight+"px");
                     }
                     // 检查子元素中的iframe
                     const targetIframes = node.querySelectorAll('#ctl00_ContentPlaceHolder1_fm_wx');
                     targetIframes.forEach(function(iframe) {
                         if (iframe.tagName.toLowerCase() === 'iframe') {
-                            adj_Iframe_Height(iframe,"1050px");
+                            const sizeInfo = getIframeSize(iframe);
+                            const newIframeHeight=sizeInfo.height+50;
+                            //console.log(newIframeHeight+"px");
+                            adj_Iframe_Height(iframe,newIframeHeight+"px");
                         }
                     });
                 }
@@ -242,7 +290,10 @@
     function init_fix_height_ctl00_ContentPlaceHolder1_fm_wx() {
         const targetIframe = document.getElementById('ctl00_ContentPlaceHolder1_fm_wx');
         if (targetIframe && targetIframe.tagName.toLowerCase() === 'iframe') {
-            adj_Iframe_Height(targetIframe,"1050px");
+            const sizeInfo = getIframeSize(targetIframe);
+            const newIframeHeight=sizeInfo.height+50;
+            //console.log(newIframeHeight+"px");
+            adj_Iframe_Height(targetIframe,newIframeHeight+"px");
         }
         // 开始监听iframe相关的DOM变化
         DOM_Observer_ctl00_ContentPlaceHolder1_fm_wx.observe(document.body, {
