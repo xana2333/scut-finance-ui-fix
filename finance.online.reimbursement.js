@@ -268,7 +268,11 @@
                 if (node.nodeType === 1) {
                     if (node.id === 'ctl00_ContentPlaceHolder1_fm_wx' && node.tagName.toLowerCase() === 'iframe') {
                         const sizeInfo = getIframeSize(node);
-                        const newIframeHeight=sizeInfo.height+50;
+                        if (sizeInfo.height<900){
+                            const newIframeHeight=900;
+                        }else{
+                            const newIframeHeight=sizeInfo.height+50;
+                        }
                         //console.log(newIframeHeight+"px");
                         adj_Iframe_Height(node,newIframeHeight+"px");
                     }
@@ -277,7 +281,11 @@
                     targetIframes.forEach(function(iframe) {
                         if (iframe.tagName.toLowerCase() === 'iframe') {
                             const sizeInfo = getIframeSize(iframe);
-                            const newIframeHeight=sizeInfo.height+50;
+                            if (sizeInfo.height<900){
+                                const newIframeHeight=900;
+                            }else{
+                                const newIframeHeight=sizeInfo.height+50;
+                            }
                             //console.log(newIframeHeight+"px");
                             adj_Iframe_Height(iframe,newIframeHeight+"px");
                         }
@@ -291,7 +299,11 @@
         const targetIframe = document.getElementById('ctl00_ContentPlaceHolder1_fm_wx');
         if (targetIframe && targetIframe.tagName.toLowerCase() === 'iframe') {
             const sizeInfo = getIframeSize(targetIframe);
-            const newIframeHeight=sizeInfo.height+50;
+            if (sizeInfo.height<900){
+                const newIframeHeight=900;
+            }else{
+                const newIframeHeight=sizeInfo.height+50;
+            }
             //console.log(newIframeHeight+"px");
             adj_Iframe_Height(targetIframe,newIframeHeight+"px");
         }
