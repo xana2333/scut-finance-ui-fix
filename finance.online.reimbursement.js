@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账
 // @namespace    http://tampermonkey.net/
-// @version      1.6
+// @version      1.7
 // @description  移除指定div的高度限制，让内容自适应；优化iframe高度
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/*
@@ -268,11 +268,7 @@
                 if (node.nodeType === 1) {
                     if (node.id === 'ctl00_ContentPlaceHolder1_fm_wx' && node.tagName.toLowerCase() === 'iframe') {
                         const sizeInfo = getIframeSize(node);
-                        if (sizeInfo.height<900){
-                            const newIframeHeight=900;
-                        }else{
-                            const newIframeHeight=sizeInfo.height+50;
-                        }
+                        const newIframeHeight = sizeInfo.height < 900 ? 900 : sizeInfo.height + 50;
                         //console.log(newIframeHeight+"px");
                         adj_Iframe_Height(node,newIframeHeight+"px");
                     }
@@ -281,11 +277,7 @@
                     targetIframes.forEach(function(iframe) {
                         if (iframe.tagName.toLowerCase() === 'iframe') {
                             const sizeInfo = getIframeSize(iframe);
-                            if (sizeInfo.height<900){
-                                const newIframeHeight=900;
-                            }else{
-                                const newIframeHeight=sizeInfo.height+50;
-                            }
+                            const newIframeHeight = sizeInfo.height < 900 ? 900 : sizeInfo.height + 50;
                             //console.log(newIframeHeight+"px");
                             adj_Iframe_Height(iframe,newIframeHeight+"px");
                         }
@@ -299,11 +291,7 @@
         const targetIframe = document.getElementById('ctl00_ContentPlaceHolder1_fm_wx');
         if (targetIframe && targetIframe.tagName.toLowerCase() === 'iframe') {
             const sizeInfo = getIframeSize(targetIframe);
-            if (sizeInfo.height<900){
-                const newIframeHeight=900;
-            }else{
-                const newIframeHeight=sizeInfo.height+50;
-            }
+            const newIframeHeight = sizeInfo.height < 900 ? 900 : sizeInfo.height + 50;
             //console.log(newIframeHeight+"px");
             adj_Iframe_Height(targetIframe,newIframeHeight+"px");
         }
