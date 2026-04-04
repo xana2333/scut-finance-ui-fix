@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         自动点击绑定按钮 (悬浮面板完整版) 很可靠
 // @namespace    http://tampermonkey.net/
-// @version      10.6
+// @version      11.1
 // @description  针对ASP.NET页面的手动触发绑定按钮点击，悬浮控制面板设计
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
@@ -19,13 +19,13 @@
     GM_addStyle(`
         #auto-bind-control-panel {
             position: fixed;
-            top: 200px;
+            top: 185px;
             left: 25%;
             z-index: 9999;
             background-color: rgba(255, 255, 255, 0.95);
             border: 1px solid #ccc;
             border-radius: 8px;
-            padding: 15px;
+            padding: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             min-width: 250px;
             max-width: 500px;
@@ -239,11 +239,48 @@
     let taskList = [];
     let currentTaskIndex = 0;
 
+    function addEmptyRowAfterTrBd() {
+        // 定位目标行
+        const targetRow = document.getElementById('tr_bd');
+        if (!targetRow) {
+            Logger.log("未找到 tr_bd 行");
+            return;
+        }
+
+        // 检查是否已存在空行
+        if (document.getElementById('tr_empty_row')) {
+            Logger.log("空行已存在");
+            return;
+        }
+
+        // 创建新行
+        const newRow = document.createElement('tr');
+        newRow.id = 'tr_empty_row';
+        newRow.style.height = '60px';
+
+        // // 创建单元格（覆盖所有列）
+        // const cell = document.createElement('td');
+        // cell.colSpan = 4; // 根据表格实际列数调整
+        // cell.style.padding = '0';
+        // cell.style.margin = '0';
+        // cell.innerHTML = '&nbsp;'; // 添加空格确保行高
+
+        // // 组装行结构
+        // newRow.appendChild(cell);
+
+        // 在目标行后插入新行
+        targetRow.insertAdjacentElement('afterend', newRow);
+        Logger.log("空白行添加成功");
+    }
+
     // 添加悬浮控制面板（来自第二个脚本）
     function addFloatingControlPanel() {
         if (document.getElementById('auto-bind-control-panel')) {
             return;
         }
+        //在<tr id="tr_bd">后插入空行
+        addEmptyRowAfterTrBd();
+
 
         controlPanel = document.createElement('div');
         controlPanel.id = 'auto-bind-control-panel';
@@ -254,7 +291,7 @@
                         一键[绑定]<br>本页所有发票
                     </button>
                     <button id="start-auto-unbind-btn" class="btn btn-startUnbond" style="visibility: visible;">
-                        一键[解绑]<br>本页所有发票
+                        一键[绑定]<br>本页所有发票
                     </button>
                     <button id="stop-auto-bind-btn" class="btn btn-stop" style="visibility: hidden;">
                         停止<br>任务
@@ -1040,7 +1077,7 @@
             unbindBtn.style.visibility = isRunning ? 'hidden' : 'visible';
         }
 
-        if (stopBtn){
+        if (stopBtn) {
             stopBtn.style.visibility = isRunning ? 'visible' : 'hidden';
         }
     }
