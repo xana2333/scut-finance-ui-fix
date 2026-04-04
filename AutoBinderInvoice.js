@@ -526,7 +526,9 @@
         );
 
         Logger.log(`找到 ${boundButtonsList.length} 个可以按下的[绑定]按钮`);
-        Logger.log(`[绑定]按钮List= ${boundButtonsList} `);
+        Logger.log(`[绑定]按钮List=`);
+        console.log(boundButtonsList);
+
         return boundButtonsList;
     }
 
@@ -727,9 +729,11 @@
     async function processButtonsSerially() {
         isRunning = true;
         toggleButtonState(true);
-        taskList = scanTableAndCreateBoundTasks();
+        taskList = scanTableAndCreateBoundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateBoundTasks函数
         updateTaskListDisplay();
         Logger.log("开始串行处理流程...");
+        Logger.log(`taskList:`);
+        console.log(taskList);
 
         while (isRunning) {
             const table = getTable('GV_ZDFPPL');
@@ -739,12 +743,28 @@
             }
 
             // 重新扫描未绑定按钮
-            const unboundButtons = findAllBoundButtons(table);
-            const totalButtons = unboundButtons.length;
+            const unboundButtonOrgn = findAllBoundButtons(table); //此处返回的是button Element对象
+            //Logger.log(`unboundButtonOrgn:`);
+            //console.log(unboundButtonOrgn);
 
-            if (totalButtons === 0) {
+            const findSharedButObjects = (taskList, nowButtons) => {
+                // 方法1：使用 Set 优化查找
+                const flatSet = new Set();
+                for (const row of taskList) {
+                    flatSet.add(row.buttonElement);
+                }
+                // 找出 nowButtons 中存在于 taskList 的对象
+                const sharedObjects = nowButtons.filter(item => flatSet.has(item));
+                return sharedObjects;
+            };
+
+            const unboundButtons=findSharedButObjects(taskList, unboundButtonOrgn); //只操作taskList里有的按钮
+            //Logger.log(`unboundButtons:`);
+            //console.log(unboundButtons);
+
+            if (unboundButtons.length === 0) {
                 Logger.log("所有按钮已处理完毕！");
-                updateStatus('已完成', `总数量: ${totalButtons}`);
+                updateStatus('已完成', `总数量: ${unboundButtons.length}`);
                 break;
             }
 
