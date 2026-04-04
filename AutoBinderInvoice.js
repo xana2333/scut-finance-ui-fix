@@ -125,7 +125,7 @@
         }
         .invoice-no {
             width: 130px; /* 发票号列宽度 */
-            font-size: 11px;
+            font-size: 10px;
             color: #333;
             white-space: nowrap;
             overflow: hidden;
@@ -241,13 +241,13 @@
             <div class="panel-header">
                 <div class="control-buttons">
                     <button id="start-auto-bind-btn" class="btn btn-start">
-                        <span style="margin-right: 5px;">🚀</span> 一键[绑定]本页所有发票
+                        一键[绑定]本页所有发票
                     </button>
                     <button id="start-auto-unbind-btn" class="btn btn-clear">
-                    <span style="margin-right: 5px;">🚀</span> 一键[解绑]本页所有发票
+                        一键[解绑]本页所有发票
                     </button>
                     <button id="stop-auto-bind-btn" class="btn btn-stop" style="display: none;">
-                        <span style="margin-right: 5px;">⏹️</span> 停止绑定
+                        <span style="margin-right: 5px;">⏹️</span> 停止任务
                     </button>
                     <button id="clear-tasks-btn" class="btn btn-clear" style="display: none;">
                         <span style="margin-right: 5px;">🧹</span> 清除列表
@@ -313,8 +313,8 @@
         header.innerHTML = `
             <div class="task-column invoice-no">发票号</div>
             <div class="task-column invoice-date">开票日期</div>
-            <div class="task-column button-id">按钮ID</div>
             <div class="task-column total-amount">合计</div>
+            <div class="task-column button-id">按钮ID</div>
             <div class="task-column task-status">状态</div>
         `;
         taskListContainer.appendChild(header);
@@ -326,8 +326,8 @@
             taskItem.innerHTML = `
                 <div class="task-column invoice-no" title="${task.invoiceNo}">${task.invoiceNo}</div>
                 <div class="task-column invoice-date">${task.invoiceDate}</div>
-                <div class="task-column button-id">${task.buttonId}</div>
                 <div class="task-column total-amount">${task.totalAmount}</div>
+                <div class="task-column button-id">${task.buttonId}</div>
                 <div class="task-column task-status status-${task.status}">
                     ${getStatusText(task.status)}
                 </div>
