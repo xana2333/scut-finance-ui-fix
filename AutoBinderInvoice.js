@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         自动点击绑定按钮 (悬浮面板完整版) 很可靠
 // @namespace    http://tampermonkey.net/
-// @version      11.1
+// @version      11.2
 // @description  针对ASP.NET页面的手动触发绑定按钮点击，悬浮控制面板设计
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
@@ -900,8 +900,8 @@
         taskList = scanTableAndCreateUnboundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateUnboundTasks函数
         updateTaskListDisplay();
         Logger.log("开始串行处理流程...");
-        Logger.log(`[一键取消绑定]taskList:`);
-        console.log(taskList);
+        //Logger.log(`[一键取消绑定]taskList:`);
+        //console.log(taskList);
 
         while (isRunning) {
             const table = getTable('GV_ZDFPPL');
@@ -936,8 +936,8 @@
             }
 
             const workList = findSharedInvoices(taskList, nowList); //只操作taskList里有的按钮
-            Logger.log(`[一键取消绑定]workList:`);
-            console.log(workList);
+            // Logger.log(`[一键取消绑定]workList:`);
+            // console.log(workList);
 
             if (workList.length === 0) {
                 Logger.log("所有按钮已处理完毕！");
@@ -1089,7 +1089,7 @@
         const clearBtn = document.getElementById('clear-tasks-btn');
         const toggleBtn = document.getElementById('toggle-detail-btn');
         const unbindBtn = document.getElementById('start-auto-unbind-btn');
-        console.log(isRunning);
+        //console.log(isRunning);
 
         if (startBtn) {
             startBtn.addEventListener('click', async function () {
