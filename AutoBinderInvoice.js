@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账-一键绑定/解绑发票
 // @namespace    http://tampermonkey.net/
-// @version      11.2
+// @version      11.3
 // @description  在税票录入页面，增加一键绑定、一键解绑功能
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
@@ -278,9 +278,6 @@
         if (document.getElementById('auto-bind-control-panel')) {
             return;
         }
-        //在<tr id="tr_bd">后插入空行
-        addEmptyRowAfterTrBd();
-
 
         controlPanel = document.createElement('div');
         controlPanel.id = 'auto-bind-control-panel';
@@ -1157,6 +1154,9 @@
             // 添加悬浮控制面板
             addFloatingControlPanel();
 
+            //在<tr id="tr_bd">后插入空行
+            addEmptyRowAfterTrBd();
+
             // 监听ASP.NET异步回发完成事件
             if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
                 const prm = Sys.WebForms.PageRequestManager.getInstance();
@@ -1164,6 +1164,9 @@
                     // 重新绑定事件
                     //bindControlEvents();
                     //Logger.log("ASP.NET异步回发完成，重新绑定事件");
+                    //在<tr id="tr_bd">后插入空行
+                    addEmptyRowAfterTrBd();
+                    Logger.log("ASP.NET异步回发完成，重新插入空行");
                 });
             }
 
