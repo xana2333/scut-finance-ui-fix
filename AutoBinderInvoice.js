@@ -453,44 +453,6 @@
         return table;
     }
 
-    // 查找所有可以按下的[绑定]的按钮 ===更新好===
-    function findAllBoundButtons(table) {
-        if (!table) return [];
-
-        const allButtons = table.querySelectorAll('input[type="submit"]');
-        const boundButtonsList = Array.from(allButtons).filter(button =>
-            button.id &&
-            button.id.includes('BT_BD0') &&
-            button.value === '绑定' &&
-            !button.disabled &&
-            button.offsetParent !== null // 检查是否可见
-        );
-
-        Logger.log(`找到 ${boundButtonsList.length} 个可以按下的[绑定]按钮`);
-        Logger.log(`[绑定]按钮List=`);
-        console.log(boundButtonsList);
-
-        return boundButtonsList;
-    }
-
-    // 查找所有可以按下的[取消绑定]的按钮 ===更新好===
-    function findAllUnboundButtons(table) {
-        if (!table) return [];
-
-        const allButtons = table.querySelectorAll('input[type="submit"]');
-        const unboundButtonsList = Array.from(allButtons).filter(button =>
-            button.id &&
-            button.id.includes('BT_QXBD') &&
-            button.value === '取消绑定' &&
-            !button.disabled &&
-            button.offsetParent !== null // 检查是否可见
-        );
-
-        Logger.log(`找到 ${unboundButtonsList.length} 个可以按下的[取消绑定]按钮`);
-        Logger.log(`[取消绑定]按钮List= ${unboundButtonsList} `);
-        return unboundButtonsList;
-    }
-
     // 检查页面是否忙碌（来自第一个脚本）
     function isPageBusy() {
         // 检查是否有正在进行的异步回发
@@ -682,29 +644,6 @@
                 Logger.error("找不到表格，退出处理");
                 break;
             }
-
-            // // 重新扫描未绑定按钮
-            // const unboundButtonOrgn = findAllBoundButtons(table); //此处返回的是button Element对象
-            // //Logger.log(`unboundButtonOrgn:`);
-            // //console.log(unboundButtonOrgn);
-
-            // const findSharedButObjects = (taskList, nowButtons) => {
-            //     // 方法1：使用 Set 优化查找
-            //     const flatSet = new Set();
-            //     for (const row of taskList) {
-            //         flatSet.add(row.buttonElement);
-            //     }
-            //     // 找出 nowButtons 中存在于 taskList 的对象
-            //     const sharedObjects = nowButtons.filter(item => flatSet.has(item));
-            //     return sharedObjects;
-            // };
-
-            // const unboundButtons = findSharedButObjects(taskList, unboundButtonOrgn); //只操作taskList里有的按钮
-            // //Logger.log(`unboundButtons:`);
-            // //console.log(unboundButtons);
-
-
-            //==================================================
 
             const nowList = scanTableAndCreateBoundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateBoundTasks函数
 
