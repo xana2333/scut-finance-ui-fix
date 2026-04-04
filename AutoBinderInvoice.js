@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         自动点击绑定按钮 (悬浮面板完整版) 很可靠
 // @namespace    http://tampermonkey.net/
-// @version      10.2
+// @version      10.3
 // @description  针对ASP.NET页面的手动触发绑定按钮点击，悬浮控制面板设计
 // @author       XANA
-// @match        http://wsyy.cw.scut.edu.cn/*
-// @match        https://wsyy.cw.scut.edu.cn/*
+// @match        http://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
+// @match        https://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
 // @grant        GM_addStyle
 // @run-at       document-end
 // ==/UserScript==
