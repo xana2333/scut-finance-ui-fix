@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         自动点击绑定按钮 (悬浮面板完整版) 很可靠
+// @name         SCUT财务系统UI优化-网上报账-一键绑定/解绑发票
 // @namespace    http://tampermonkey.net/
 // @version      11.2
-// @description  针对ASP.NET页面的手动触发绑定按钮点击，悬浮控制面板设计
+// @description  在税票录入页面，增加一键绑定、一键解绑功能
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
 // @match        https://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
