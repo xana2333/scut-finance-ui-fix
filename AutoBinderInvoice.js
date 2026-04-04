@@ -390,8 +390,13 @@
             const entryDate = cells[13].textContent.trim(); // 录入日期
 
 
-            if (invoiceNo && invoiceDate && button) {
-                const existingTask = taskList.find(t => t.buttonId === button.id);
+            if (invoiceNo && //必须包含发票号
+                BoundButtonId.includes('BT_BD0') &&
+                BoundButtonElement.value === '绑定' &&
+                !BoundButtonElement.disabled &&
+                BoundButtonElement.offsetParent !== null // 检查是否可见
+            ) {
+                const existingTask = taskList.find(t => t.invoiceNo === invoiceNo); //查重条件改为发票号
 
                 tasks.push({
                     invoiceNo, //发票号
@@ -678,37 +683,70 @@
                 break;
             }
 
-            // 重新扫描未绑定按钮
-            const unboundButtonOrgn = findAllBoundButtons(table); //此处返回的是button Element对象
-            //Logger.log(`unboundButtonOrgn:`);
-            //console.log(unboundButtonOrgn);
+            // // 重新扫描未绑定按钮
+            // const unboundButtonOrgn = findAllBoundButtons(table); //此处返回的是button Element对象
+            // //Logger.log(`unboundButtonOrgn:`);
+            // //console.log(unboundButtonOrgn);
 
-            const findSharedButObjects = (taskList, nowButtons) => {
-                // 方法1：使用 Set 优化查找
-                const flatSet = new Set();
-                for (const row of taskList) {
-                    flatSet.add(row.buttonElement);
-                }
-                // 找出 nowButtons 中存在于 taskList 的对象
-                const sharedObjects = nowButtons.filter(item => flatSet.has(item));
-                return sharedObjects;
-            };
+            // const findSharedButObjects = (taskList, nowButtons) => {
+            //     // 方法1：使用 Set 优化查找
+            //     const flatSet = new Set();
+            //     for (const row of taskList) {
+            //         flatSet.add(row.buttonElement);
+            //     }
+            //     // 找出 nowButtons 中存在于 taskList 的对象
+            //     const sharedObjects = nowButtons.filter(item => flatSet.has(item));
+            //     return sharedObjects;
+            // };
 
-            const unboundButtons=findSharedButObjects(taskList, unboundButtonOrgn); //只操作taskList里有的按钮
-            //Logger.log(`unboundButtons:`);
-            //console.log(unboundButtons);
+            // const unboundButtons = findSharedButObjects(taskList, unboundButtonOrgn); //只操作taskList里有的按钮
+            // //Logger.log(`unboundButtons:`);
+            // //console.log(unboundButtons);
 
-            if (unboundButtons.length === 0) {
+
+            //==================================================
+
+            const nowList = scanTableAndCreateBoundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateBoundTasks函数
+
+            const findSharedInvoices = (taskList, nowList) => {
+                const list1 = nowList;
+                const list2 = taskList;
+                // 创建一个 Set 用于存储 list2 中的所有发票号
+                const invoiceNosInList2 = new Set();
+
+                list2.forEach(task => { // 遍历 list2 中的每个任务
+                    invoiceNosInList2.add(task.invoiceNo);// 将每个任务的发票号添加到 Set 中
+                });
+
+                const resultList = [];// 创建一个空数组用于存储匹配的任务
+
+                // 遍历 list1 中的每个任务
+                list1.forEach(task => {
+                    // 检查当前任务的发票号是否存在于 list2 的发票号集合中
+                    if (invoiceNosInList2.has(task.invoiceNo)) {
+                        // 如果存在，直接将 list1 中的任务添加到结果数组中
+                        resultList.push(task);
+                    }
+                });
+                return resultList;// 返回包含匹配任务的新列表
+            }
+
+            const workList = findSharedInvoices(taskList, nowList); //只操作taskList里有的按钮
+            Logger.log(`workList:`);
+            console.log(workList);
+
+            if (workList.length === 0) {
                 Logger.log("所有按钮已处理完毕！");
-                updateStatus('已完成', `总数量: ${unboundButtons.length}`);
+                updateStatus('已完成', `总数量: ${workList.length}`);
                 break;
             }
 
             // 更新进度
-            updateStatus('处理中', `剩余: ${unboundButtons.length}`);
+            updateStatus('处理中', `剩余: ${workList.length}`);
 
             // 只处理第一个按钮
-            const firstButton = unboundButtons[0];
+            //const firstButton = unboundButtons[0];
+            const firstButton = workList[0].BoundButtonElement;
             const buttonId = firstButton.id;
 
             // 查找对应的任务
@@ -719,7 +757,7 @@
                 updateCurrentTaskInfo(task);
             }
 
-            Logger.log(`准备处理按钮: ${buttonId} (${unboundButtons.length} 个剩余)`);
+            Logger.log(`准备处理按钮: ${buttonId} (${workList.length} 个剩余)`);
 
             try {
                 // 等待页面稳定
