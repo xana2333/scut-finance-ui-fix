@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         自动点击绑定按钮 (悬浮面板完整版) 很可靠
 // @namespace    http://tampermonkey.net/
-// @version      10.3
+// @version      10.4
 // @description  针对ASP.NET页面的手动触发绑定按钮点击，悬浮控制面板设计
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
@@ -10,7 +10,7 @@
 // @run-at       document-end
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     // 添加CSS样式（来自第二个脚本）
@@ -241,7 +241,10 @@
             <div class="panel-header">
                 <div class="control-buttons">
                     <button id="start-auto-bind-btn" class="btn btn-start">
-                        <span style="margin-right: 5px;">🚀</span> 一键绑定本页所有发票
+                        <span style="margin-right: 5px;">🚀</span> 一键[绑定]本页所有发票
+                    </button>
+                    <button id="start-auto-unbind-btn" class="btn btn-clear">
+                    <span style="margin-right: 5px;">🚀</span> 一键[解绑]本页所有发票
                     </button>
                     <button id="stop-auto-bind-btn" class="btn btn-stop" style="display: none;">
                         <span style="margin-right: 5px;">⏹️</span> 停止绑定
@@ -369,7 +372,7 @@
             const totalAmount = cells[7].textContent.trim(); // 提取发票合计金额
             const businessNo = cells[8].textContent.trim(); // 业务编号
 
-             // 提取[删除]按钮信息
+            // 提取[删除]按钮信息
             const deleteButton = row.querySelector('input[type="image"][src*="del.png"]');
             const deleteButtonId = deleteButton?.id || '';
             const deleteButtonElement = deleteButton || null;
@@ -380,7 +383,7 @@
             const BoundButtonId = BoundButton?.id || '';
             const BoundButtonElement = BoundButton || null;
 
-            
+
             const invoiceType = row.querySelector('span[id$="LBL_FPLX"]')?.textContent.trim() || '';// 提取发票类型
             const entryDate = cells[13].textContent.trim(); // 录入日期
 
@@ -398,18 +401,18 @@
                     taxAmount, // 税额
                     totalAmount, //发票合计金额
                     businessNo, // 业务编号
-                    deleteButtonId:deleteButtonId, // 删除按钮的id
-                    deleteButtonElement:deleteButtonElement, // 删除按钮的Element
+                    deleteButtonId: deleteButtonId, // 删除按钮的id
+                    deleteButtonElement: deleteButtonElement, // 删除按钮的Element
 
                     buttonId: button.id, //绑定按钮id --老方法--
                     buttonElement: button, //绑定按钮Element --老方法--
 
-                    BoundButtonId:BoundButtonId, //绑定按钮id
-                    BoundButtonElement:BoundButtonElement, //绑定按钮Element
+                    BoundButtonId: BoundButtonId, //绑定按钮id
+                    BoundButtonElement: BoundButtonElement, //绑定按钮Element
 
                     invoiceType, // 发票类型
                     entryDate, // 录入日期
-                    
+
                     status: existingTask ? existingTask.status : 'pending'
                 });
             }
@@ -419,7 +422,7 @@
     }
 
 
-      // 扫描表格并创建【取消绑定】任务列表 ===更新好===
+    // 扫描表格并创建【取消绑定】任务列表 ===更新好===
     function scanTableAndCreateUnboundTasks() {
         const table = getTable('GV_ZDFPPL');
         if (!table) return [];
@@ -441,7 +444,7 @@
             const totalAmount = cells[7].textContent.trim(); // 提取发票合计金额
             const businessNo = cells[8].textContent.trim(); // 业务编号
 
-             // 提取[删除]按钮信息
+            // 提取[删除]按钮信息
             const deleteButton = row.querySelector('input[type="image"][src*="del.png"]');
             const deleteButtonId = deleteButton?.id || '';
             const deleteButtonElement = deleteButton || null;
@@ -452,7 +455,7 @@
             const BoundButtonId = BoundButton?.id || '';
             const BoundButtonElement = BoundButton || null;
 
-            
+
             const invoiceType = row.querySelector('span[id$="LBL_FPLX"]')?.textContent.trim() || '';// 提取发票类型
             const entryDate = cells[13].textContent.trim(); // 录入日期
 
@@ -470,18 +473,18 @@
                     taxAmount, // 税额
                     totalAmount, //发票合计金额
                     businessNo, // 业务编号
-                    deleteButtonId:deleteButtonId, // 删除按钮的id
-                    deleteButtonElement:deleteButtonElement, // 删除按钮的Element
+                    deleteButtonId: deleteButtonId, // 删除按钮的id
+                    deleteButtonElement: deleteButtonElement, // 删除按钮的Element
 
                     buttonId: button.id, //绑定按钮id --老方法--
                     buttonElement: button, //绑定按钮Element --老方法--
 
-                    BoundButtonId:BoundButtonId, //绑定按钮id
-                    BoundButtonElement:BoundButtonElement, //绑定按钮Element
+                    BoundButtonId: BoundButtonId, //绑定按钮id
+                    BoundButtonElement: BoundButtonElement, //绑定按钮Element
 
                     invoiceType, // 发票类型
                     entryDate, // 录入日期
-                    
+
                     status: existingTask ? existingTask.status : 'pending'
                 });
             }
@@ -494,17 +497,17 @@
     // 替换confirm函数（来自第一个脚本）
     function setupAutoConfirm() {
         const originalConfirm = window.confirm;
-        window.confirm = function(message) {
+        window.confirm = function (message) {
             Logger.log(`自动确认弹窗: "${message}"`);
             return true; // 自动点击 "确定"
         };
     }
 
     // 获取目标表格--参数化目标表格id ===更新好===
-    function getTable(ElementId='GV_ZDFPPL') {
+    function getTable(ElementId = 'GV_ZDFPPL') {
         const table = document.getElementById(ElementId);
         if (!table) {
-            Logger.error("未找到 ID 为 "+ElementId+" 的表格。");
+            Logger.error("未找到 ID 为 " + ElementId + " 的表格。");
         }
         return table;
     }
@@ -517,7 +520,7 @@
         const boundButtonsList = Array.from(allButtons).filter(button =>
             button.id &&
             button.id.includes('BT_BD0') &&
-            button.value==='绑定' &&
+            button.value === '绑定' &&
             !button.disabled &&
             button.offsetParent !== null // 检查是否可见
         );
@@ -535,7 +538,7 @@
         const unboundButtonsList = Array.from(allButtons).filter(button =>
             button.id &&
             button.id.includes('BT_QXBD') &&
-            button.value==='取消绑定' &&
+            button.value === '取消绑定' &&
             !button.disabled &&
             button.offsetParent !== null // 检查是否可见
         );
@@ -677,7 +680,7 @@
             }
 
             // 使用postback
-            if (typeof(__doPostBack) !== 'undefined' && currentButton.name) {
+            if (typeof (__doPostBack) !== 'undefined' && currentButton.name) {
                 Logger.log(`触发 postback: ${currentButton.name}`);
                 __doPostBack(currentButton.name, '');
             } else {
@@ -705,7 +708,7 @@
             }
 
             // 使用postback
-            if (typeof(__doPostBack) !== 'undefined' && currentButton.name) {
+            if (typeof (__doPostBack) !== 'undefined' && currentButton.name) {
                 Logger.log(`触发 postback: ${currentButton.name}`);
                 __doPostBack(currentButton.name, '');
             } else {
@@ -884,9 +887,10 @@
         const stopBtn = document.getElementById('stop-auto-bind-btn');
         const clearBtn = document.getElementById('clear-tasks-btn');
         const toggleBtn = document.getElementById('toggle-detail-btn');
+        const unbindBtn = document.getElementById('start-auto-unbind-btn');
 
         if (startBtn) {
-            startBtn.addEventListener('click', async function() {
+            startBtn.addEventListener('click', async function () {
                 if (!isRunning) {
                     Logger.log("开始自动绑定流程...");
                     setupAutoConfirm();
@@ -895,15 +899,24 @@
             });
         }
 
+        if (unbindBtn) {
+            unbindBtn.addEventListener('click', async function () {
+                if (!isRunning) {
+                    Logger.log("开始自动解绑流程...");
+                    //await processUnbindButtonsSerially();//============待修改========
+                }
+            });
+        }
+
         if (stopBtn) {
-            stopBtn.addEventListener('click', function() {
+            stopBtn.addEventListener('click', function () {
                 Logger.log("用户手动停止绑定流程");
                 isRunning = false;
             });
         }
 
         if (clearBtn) {
-            clearBtn.addEventListener('click', function() {
+            clearBtn.addEventListener('click', function () {
                 taskList = [];
                 updateTaskListDisplay();
                 document.getElementById('current-task-info').textContent = '当前任务: -';
@@ -911,7 +924,7 @@
         }
 
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', function() {
+            toggleBtn.addEventListener('click', function () {
                 const detailSection = document.getElementById('detail-section');
                 const toggleIcon = document.getElementById('toggle-icon');
 
@@ -939,7 +952,7 @@
             // 监听ASP.NET异步回发完成事件
             if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
                 const prm = Sys.WebForms.PageRequestManager.getInstance();
-                prm.add_endRequest(function(sender, args) {
+                prm.add_endRequest(function (sender, args) {
                     // 重新绑定事件
                     bindControlEvents();
                     Logger.log("ASP.NET异步回发完成，重新绑定事件");
