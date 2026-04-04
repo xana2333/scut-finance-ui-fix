@@ -80,6 +80,14 @@
             background-color: #4CAF50;
             color: white;
         }
+        .btn-startBond {
+            background-color: #1486d2;
+            color: white;
+        }
+        .btn-startUnbond {
+            background-color: #ff9800;
+            color: white;
+        }
         .btn-stop {
             background-color: #f44336;
             color: white;
@@ -135,8 +143,8 @@
             padding: 0 5px;
         }
         .invoice-date {
-            width: 60px; /* 开票日期列宽度 */
-            font-size: 12px;
+            width: 50px; /* 开票日期列宽度 */
+            font-size: 10px;
             color: #666;
             white-space: nowrap;
             overflow: hidden;
@@ -153,7 +161,7 @@
             padding: 0 5px;
         }
         .button-id {
-            width: 140px; /* 按钮ID列宽度 */
+            width: 135px; /* 按钮ID列宽度 */
             font-size: 10px;
             color: #444;
             white-space: nowrap;
@@ -242,20 +250,20 @@
         controlPanel.innerHTML = `
             <div class="panel-header">
                 <div class="control-buttons">
-                    <button id="start-auto-bind-btn" class="btn btn-start">
-                        一键[绑定]本页所有发票
+                    <button id="start-auto-bind-btn" class="btn btn-startBond" style="visibility: visible;">
+                        一键[绑定]<br>本页所有发票
                     </button>
-                    <button id="start-auto-unbind-btn" class="btn btn-clear">
-                        一键[解绑]本页所有发票
+                    <button id="start-auto-unbind-btn" class="btn btn-startUnbond" style="visibility: visible;">
+                        一键[解绑]<br>本页所有发票
                     </button>
-                    <button id="stop-auto-bind-btn" class="btn btn-stop" style="display: none;">
-                        <span style="margin-right: 5px;">⏹️</span> 停止任务
+                    <button id="stop-auto-bind-btn" class="btn btn-stop" style="visibility: hidden;">
+                        停止<br>任务
                     </button>
-                    <button id="clear-tasks-btn" class="btn btn-clear" style="display: none;">
-                        清除列表
+                    <button id="clear-tasks-btn" class="btn btn-clear" style="visibility: visible;">
+                        清除<br>列表
                     </button>
                     <button id="toggle-detail-btn" class="btn btn-toggle">
-                    <span id="toggle-icon">►</span> 展开详情
+                    <span id="toggle-icon">►</span> 展开<br>详情
                     </button>
                 </div>
             </div>
@@ -636,7 +644,7 @@
     function updateCurrentTaskInfo(task) {
         const taskInfoElement = document.getElementById('current-task-info');
         if (taskInfoElement) {
-            taskInfoElement.textContent = `当前任务: ${task.invoiceNo} (${task.invoiceDate})`;
+            taskInfoElement.textContent = `当前任务: ${task.invoiceNo} (${task.invoiceDate})(${task.totalAmount})`;
         }
     }
 
@@ -1017,19 +1025,23 @@
     // 切换按钮状态（来自第一个脚本）
     function toggleButtonState(isRunning) {
         const startBtn = document.getElementById('start-auto-bind-btn');
+        const unbindBtn = document.getElementById('start-auto-unbind-btn');
+
         const stopBtn = document.getElementById('stop-auto-bind-btn');
         const clearBtn = document.getElementById('clear-tasks-btn');
 
+        const toggleBtn = document.getElementById('toggle-detail-btn');
+
         if (startBtn) {
-            startBtn.style.display = isRunning ? 'none' : 'flex';
+            startBtn.style.visibility = isRunning ? 'hidden' : 'visible';
         }
 
-        if (stopBtn) {
-            stopBtn.style.display = isRunning ? 'flex' : 'none';
+        if (unbindBtn) {
+            unbindBtn.style.visibility = isRunning ? 'hidden' : 'visible';
         }
 
-        if (clearBtn) {
-            clearBtn.style.display = isRunning ? 'none' : 'flex';
+        if (stopBtn){
+            stopBtn.style.visibility = isRunning ? 'visible' : 'hidden';
         }
     }
 
@@ -1040,6 +1052,7 @@
         const clearBtn = document.getElementById('clear-tasks-btn');
         const toggleBtn = document.getElementById('toggle-detail-btn');
         const unbindBtn = document.getElementById('start-auto-unbind-btn');
+        console.log(isRunning);
 
         if (startBtn) {
             startBtn.addEventListener('click', async function () {
@@ -1090,12 +1103,12 @@
                     // 展开详情
                     detailSection.classList.remove('collapsed');
                     toggleIcon.textContent = '▼';
-                    toggleBtn.innerHTML = `<span id="toggle-icon">▼</span> 收起详情`;
+                    toggleBtn.innerHTML = `<span id="toggle-icon">▼</span> 收起<br>详情`;
                 } else {
                     // 折叠详情
                     detailSection.classList.add('collapsed');
                     toggleIcon.textContent = '►';
-                    toggleBtn.innerHTML = `<span id="toggle-icon">►</span> 展开详情`;
+                    toggleBtn.innerHTML = `<span id="toggle-icon">►</span> 展开<br>详情`;
                 }
             });
         }
