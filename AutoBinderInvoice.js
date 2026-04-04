@@ -18,7 +18,7 @@
         #auto-bind-control-panel {
             position: fixed;
             top: 200px;
-            right: 50%;
+            left: 25%;
             z-index: 9999;
             background-color: rgba(255, 255, 255, 0.95);
             border: 1px solid #ccc;
