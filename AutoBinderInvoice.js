@@ -143,19 +143,19 @@
             text-overflow: ellipsis;
             padding: 0 5px;
         }
-        .button-id {
-            width: 140px; /* 按钮ID列宽度 */
-            font-size: 11px;
-            color: #444;
+        .total-amount {
+            width: 60px; /* 合计列宽度 */
+            font-size: 12px;
+            color: #666;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             padding: 0 5px;
         }
-        .total-amount {
-            width: 60px; /* 合计列宽度 */
-            font-size: 12px;
-            color: #666;
+        .button-id {
+            width: 140px; /* 按钮ID列宽度 */
+            font-size: 10px;
+            color: #444;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -252,7 +252,7 @@
                         <span style="margin-right: 5px;">⏹️</span> 停止任务
                     </button>
                     <button id="clear-tasks-btn" class="btn btn-clear" style="display: none;">
-                        <span style="margin-right: 5px;">🧹</span> 清除列表
+                        清除列表
                     </button>
                     <button id="toggle-detail-btn" class="btn btn-toggle">
                     <span id="toggle-icon">►</span> 展开详情
@@ -411,8 +411,8 @@
                     deleteButtonId: deleteButtonId, // 删除按钮的id
                     deleteButtonElement: deleteButtonElement, // 删除按钮的Element
 
-                    buttonId: button.id, //绑定按钮id --老方法--
-                    buttonElement: button, //绑定按钮Element --老方法--
+                    buttonId: button.id, //按钮id --老方法--
+                    buttonElement: button, //按钮Element --老方法--
 
                     BoundButtonId: BoundButtonId, //绑定按钮id
                     BoundButtonElement: BoundButtonElement, //绑定按钮Element
@@ -428,12 +428,80 @@
         return tasks;
     }
 
-
     // 扫描表格并创建【取消绑定】任务列表 ===更新好===
     function scanTableAndCreateUnboundTasks() {
-        ;
-    }
+        const table = getTable('GV_ZDFPPL');
+        if (!table) return [];
 
+        const tasks = [];
+        const rows = table.querySelectorAll('tr:not(.header)');
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 9) return;
+
+            const invoiceNo = cells[1].textContent.trim(); //发票号
+            const invoiceDate = cells[2].textContent.trim(); //发票日期
+            const issuerName = cells[3].textContent.trim(); // 开票方名称
+            const invoiceContent = row.querySelector('span[id$="LBL_FPNR"]')?.textContent.trim() || '';// 提取发票内容
+            const payer = row.querySelector('span[id$="LBL_FKDWMC"]')?.textContent.trim() || '';// 提取付款单位
+            const amount = cells[5].textContent.trim(); // 金额
+            const taxAmount = cells[6].textContent.trim(); // 税额
+            const totalAmount = cells[7].textContent.trim(); // 提取发票合计金额
+            const businessNo = cells[8].textContent.trim(); // 业务编号
+
+            // 提取[删除]按钮信息
+            const deleteButton = row.querySelector('input[type="image"][src*="del.png"]');
+            const deleteButtonId = deleteButton?.id || '';
+            const deleteButtonElement = deleteButton || null;
+
+            // 提取[取消绑定]按钮信息
+            const UnboundButton = row.querySelector('input[type="submit"][value="取消绑定"]'); //[取消绑定]按钮
+            const UnboundButtonId = UnboundButton?.id || '';
+            const UnboundButtonElement = UnboundButton || null;
+
+
+            const invoiceType = row.querySelector('span[id$="LBL_FPLX"]')?.textContent.trim() || '';// 提取发票类型
+            const entryDate = cells[13].textContent.trim(); // 录入日期
+
+
+            if (invoiceNo && //必须包含发票号
+                UnboundButtonId.includes('BT_QXBD') &&
+                UnboundButtonElement.value === '取消绑定' &&
+                !UnboundButtonElement.disabled &&
+                UnboundButtonElement.offsetParent !== null // 检查是否可见
+            ) {
+                const existingTask = taskList.find(t => t.invoiceNo === invoiceNo); //查重条件改为发票号
+
+                tasks.push({
+                    invoiceNo, //发票号
+                    invoiceDate, //发票日期
+                    issuerName, // 开票方名称
+                    invoiceContent, // 发票内容
+                    payer, // 付款单位
+                    amount, // 金额
+                    taxAmount, // 税额
+                    totalAmount, //发票合计金额
+                    businessNo, // 业务编号
+                    deleteButtonId: deleteButtonId, // 删除按钮的id
+                    deleteButtonElement: deleteButtonElement, // 删除按钮的Element
+
+                    buttonId: UnboundButtonId, //按钮id --老方法--
+                    buttonElement: UnboundButtonElement, //按钮Element --老方法--
+
+                    UnboundButtonId: UnboundButtonId, //绑定按钮id
+                    UnboundButtonElement: UnboundButtonElement, //绑定按钮Element
+
+                    invoiceType, // 发票类型
+                    entryDate, // 录入日期
+
+                    status: existingTask ? existingTask.status : 'pending'
+                });
+            }
+        });
+
+        return tasks;
+    }
 
     // 替换confirm函数（来自第一个脚本）
     function setupAutoConfirm() {
@@ -628,15 +696,15 @@
         }
     }
 
-    // 串行处理函数（保留第一个脚本的核心逻辑，添加任务状态更新）
-    async function processButtonsSerially() {
+    // 串行处理函数 一键绑定 功能
+    async function processAutoBoundButtonsSerially() {
         isRunning = true;
         toggleButtonState(true);
         taskList = scanTableAndCreateBoundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateBoundTasks函数
         updateTaskListDisplay();
         Logger.log("开始串行处理流程...");
-        Logger.log(`taskList:`);
-        console.log(taskList);
+        // Logger.log(`[一键绑定]taskList:`);
+        // console.log(taskList);
 
         while (isRunning) {
             const table = getTable('GV_ZDFPPL');
@@ -671,8 +739,8 @@
             }
 
             const workList = findSharedInvoices(taskList, nowList); //只操作taskList里有的按钮
-            Logger.log(`workList:`);
-            console.log(workList);
+            // Logger.log(`[一键绑定]workList:`);
+            // console.log(workList);
 
             if (workList.length === 0) {
                 Logger.log("所有按钮已处理完毕！");
@@ -684,8 +752,7 @@
             updateStatus('处理中', `剩余: ${workList.length}`);
 
             // 只处理第一个按钮
-            //const firstButton = unboundButtons[0];
-            const firstButton = workList[0].BoundButtonElement;
+            const firstButton = workList[0].buttonElement;
             const buttonId = firstButton.id;
 
             // 查找对应的任务
@@ -781,6 +848,158 @@
         Logger.log("处理流程结束");
     }
 
+    // 串行处理函数 一键取消绑定 功能
+    async function processAutoUnoundButtonsSerially() {
+        isRunning = true;
+        toggleButtonState(true);
+        taskList = scanTableAndCreateUnboundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateUnboundTasks函数
+        updateTaskListDisplay();
+        Logger.log("开始串行处理流程...");
+        Logger.log(`[一键取消绑定]taskList:`);
+        console.log(taskList);
+
+        while (isRunning) {
+            const table = getTable('GV_ZDFPPL');
+            if (!table) {
+                Logger.error("找不到表格，退出处理");
+                break;
+            }
+
+            const nowList = scanTableAndCreateUnboundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateUnboundTasks函数
+
+            const findSharedInvoices = (taskList, nowList) => {
+                const list1 = nowList;
+                const list2 = taskList;
+                // 创建一个 Set 用于存储 list2 中的所有发票号
+                const invoiceNosInList2 = new Set();
+
+                list2.forEach(task => { // 遍历 list2 中的每个任务
+                    invoiceNosInList2.add(task.invoiceNo);// 将每个任务的发票号添加到 Set 中
+                });
+
+                const resultList = [];// 创建一个空数组用于存储匹配的任务
+
+                // 遍历 list1 中的每个任务
+                list1.forEach(task => {
+                    // 检查当前任务的发票号是否存在于 list2 的发票号集合中
+                    if (invoiceNosInList2.has(task.invoiceNo)) {
+                        // 如果存在，直接将 list1 中的任务添加到结果数组中
+                        resultList.push(task);
+                    }
+                });
+                return resultList;// 返回包含匹配任务的新列表
+            }
+
+            const workList = findSharedInvoices(taskList, nowList); //只操作taskList里有的按钮
+            Logger.log(`[一键取消绑定]workList:`);
+            console.log(workList);
+
+            if (workList.length === 0) {
+                Logger.log("所有按钮已处理完毕！");
+                updateStatus('已完成', `总数量: ${workList.length}`);
+                break;
+            }
+
+            // 更新进度
+            updateStatus('处理中', `剩余: ${workList.length}`);
+
+            // 只处理倒数第一个按钮
+            const firstButton = workList[workList.length - 1].buttonElement;
+            const buttonId = firstButton.id;
+
+            // 查找对应的任务
+            const task = taskList.find(t => t.buttonId === buttonId);
+            if (task) {
+                task.status = 'processing';
+                updateTaskListDisplay();
+                updateCurrentTaskInfo(task);
+            }
+
+            Logger.log(`准备处理按钮: ${buttonId} (${workList.length} 个剩余)`);
+
+            try {
+                // 等待页面稳定
+                await waitForPageStable();
+
+                // 检查是否停止
+                if (!isRunning) break;
+
+                // 安全点击按钮
+                const clickResult = await safeClickUnoundButton(firstButton);
+
+                if (!clickResult.success) {
+                    Logger.warn(`按钮 ${buttonId} 点击失败: ${clickResult.reason}`);
+
+                    if (clickResult.reason === 'stopped') {
+                        break;
+                    }
+
+                    // 更新任务状态
+                    if (task) {
+                        if (clickResult.reason === 'button_unavailable') {
+                            task.status = 'skipped';
+                        } else {
+                            task.status = 'failed';
+                        }
+                        updateTaskListDisplay();
+                    }
+
+                    // 如果按钮不可用，继续处理下一个
+                    continue;
+                }
+
+                // 等待按钮状态变化
+                const result = await waitForUnboundButtonStateChange(buttonId);
+                Logger.log(`按钮 ${buttonId} 处理结果:`, result);
+
+                // 更新任务状态
+                if (task) {
+                    if (result.success) {
+                        task.status = 'success';
+                    } else {
+                        task.status = 'failed';
+                    }
+                    updateTaskListDisplay();
+                }
+
+                // 根据结果决定等待时间
+                const waitTime = result.success ? 2000 : 3000;
+
+                // 等待期间检查是否停止
+                for (let i = 0; i < waitTime / 100 && isRunning; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                if (!isRunning) break;
+            } catch (error) {
+                Logger.error(`处理按钮 ${buttonId} 时出错:`, error);
+
+                // 更新任务状态
+                if (task) {
+                    task.status = 'failed';
+                    updateTaskListDisplay();
+                }
+
+                // 等待期间检查是否停止
+                for (let i = 0; i < 20 && isRunning; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                if (!isRunning) break;
+            }
+        }
+
+        isRunning = false;
+        toggleButtonState(false);
+        updateStatus('已停止');
+
+        if (!isRunning) {
+            updateStatus('已完成');
+        }
+
+        Logger.log("处理流程结束");
+    }
+
     // 更新状态显示（来自第一个脚本）
     function updateStatus(status, progress = '') {
         const statusElement = document.getElementById('bind-status');
@@ -826,8 +1045,9 @@
             startBtn.addEventListener('click', async function () {
                 if (!isRunning) {
                     Logger.log("开始自动绑定流程...");
+                    taskList = [];
                     setupAutoConfirm();
-                    await processButtonsSerially();
+                    await processAutoBoundButtonsSerially();
                 }
             });
         }
@@ -836,7 +1056,9 @@
             unbindBtn.addEventListener('click', async function () {
                 if (!isRunning) {
                     Logger.log("开始自动解绑流程...");
-                    //await processUnbindButtonsSerially();//============待修改========
+                    taskList = [];
+                    setupAutoConfirm();
+                    await processAutoUnoundButtonsSerially();
                 }
             });
         }
