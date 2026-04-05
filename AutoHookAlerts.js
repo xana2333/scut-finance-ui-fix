@@ -11,7 +11,7 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     console.log("[Tampermonkey] Hook Alerts script started");
@@ -20,17 +20,17 @@
     function hookWindow(win, frameName) {
         try {
             if (win._alertHooked) return; // 避免重复 Hook
-            win.alert = function(message) {
-                console.log("Alert in frame:", frameName," , message:", message);
+            win.alert = function (message) {
+                console.log("Alert in frame:", frameName, " , message:", message);
                 //debugger;
             };
-            win.confirm = function(message) {
-                console.log("Confirm in frame:", frameName," , message:", message);
+            win.confirm = function (message) {
+                console.log("Confirm in frame:", frameName, " , message:", message);
                 //debugger;
                 return true; // 或根据需要返回 false
             };
-            win.prompt = function(message, defaultValue) {
-                console.log("Prompt in frame:", frameName," , message:", message);
+            win.prompt = function (message, defaultValue) {
+                console.log("Prompt in frame:", frameName, " , message:", message);
                 //debugger;
                 return defaultValue;
             };
@@ -43,6 +43,7 @@
     /** Hook 所有当前已有的 frame */
     function hookAllFrames() {
         hookWindow(window, 'top');
+
         for (let i = 0; i < window.frames.length; i++) {
             hookWindow(window.frames[i], `frame-${i}`);
         }
