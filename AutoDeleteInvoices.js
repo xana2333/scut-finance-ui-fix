@@ -14,6 +14,57 @@
 (function () {
     'use strict';
 
+
+    // 添加悬浮按钮的样式
+    GM_addStyle(`
+        #myFloatingBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            z-index: 999999;
+        }
+        #myFloatingBtn:hover {
+            background-color: #e64a19;
+        }
+    `);
+    // 创建悬浮按钮
+    function createFloatingButton() {
+        const btn = document.createElement('button');
+        btn.id = 'myFloatingBtn';
+        btn.textContent = 'Test';
+        btn.title = '点击测试函数';
+
+        btn.addEventListener('click', () => {
+            const currentUrl = window.location.href;
+            console.log("currentUrl", currentUrl);
+            // 这里也可以调用你已有的函数，如 setupAutoAlert();
+            // setupAutoAlert();
+
+            //获取发票列表
+            const list = extractTableInformation();
+            console.log("list", list);
+            if (list && list.length > 0) {
+                const result = safeClickDeleteButton(list[0]);
+                console.log("return", result.success, result.reason, result.error);
+                // alert("line181");
+                // confirm("line191");
+            }
+
+        });
+
+        document.body.appendChild(btn);
+    }
+
+
     // 定义提取函数
     function extractTableInformation() {
         // 获取表格
@@ -119,57 +170,68 @@
         }
     }
 
-    function setupAutoAlert() {
-        const originalAlert = window.alert;
-        window.alert = (message) => {
-            console.log(`自动确认alert弹窗: "${message}"`);
-            return; // 不显示原本的弹窗，直接自动确认
-        };
-        const originalConfirm = window.confirm;
-        window.confirm = function (message) {
-            console.log(`自动确认弹窗: "${message}"`);
-            return true; // 自动点击 "确定"
-        };
+
+
+    // 用于覆写原始windo弹窗函数
+    function hookWindow(win, frameName) {
+        try {
+            if (win._alertHooked) return;
+
+            const originalAlert = window.alert;
+            win.alert = function (message) {
+                console.log("Alert frame URL:", win.location.href);
+                console.log("Alert frame URL:", win.location.href,", name:", frameName, ", message:", message);
+                // debugger;
+
+                //只替换指定消息的弹窗
+                if (message === "删除成功！" &&
+                    win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
+                    console.log("我的票夹页面 删除发票成功");
+                } else {
+                    //其余消息放行
+                    originalAlert(message);
+                }
+            };
+
+            const originalConfirm = window.confirm;
+            win.confirm = function (message) {
+                console.log("Confirm frame URL:", win.location.href, ", name:", frameName, ", message:", message);
+                // debugger;
+
+                //只替换指定消息的弹窗
+                if (message === "注1意：删除后如果再需要用这张票的话，需要重新上传查验，您确定要删除吗？" &&
+                    win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
+                    console.log("我的票夹页面 自动确认删除发票对话框");
+                    return true;
+                } else {
+                    //其余消息放行
+                    originalConfirm(message);
+                }
+                return true;
+            };
+
+            // const originalPrompt = window.prompt;
+            // win.prompt = function (message, defaultValue) {
+            //     console.log("Prompt frame URL:",win.location.href);
+            //     console.log("Prompt in frame:", frameName, ", message:", message);
+            //     // debugger;
+            //     return defaultValue;
+            // };
+
+            win._alertHooked = true;
+        } catch (e) {
+            console.warn("Cannot hook frame:", frameName, e);
+        }
     }
 
-    function observeMutationsForAlertOverride() {
-        //     // 使用 MutationObserver 监控动态插入的脚本或内容
-        //     const observer = new MutationObserver(() => {
-        //         setupAutoAlert(); // 每次 DOM 发生变化时重新覆盖 alert
-        //         console.log("重新覆盖 alert()，确保弹窗被拦截！");
-        //     });
-
-        //     // 监听整个文档的修改
-        //     observer.observe(document.body, {
-        //         childList: true, // 监听子元素的变化
-        //         subtree: true    // 递归监听所有子节点
-        //     });
-
-        const observer = new MutationObserver(mutations => {
-            mutations.forEach(mutation => {
-                // 检查新增的脚本内容
-                const addedNodes = mutation.addedNodes;
-                addedNodes.forEach(node => {
-                    if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "SCRIPT") {
-                        const scriptContent = node.textContent || node.innerText;
-
-                        // 如果匹配到 alert('删除成功！');
-                        if (scriptContent.includes("alert('删除成功！');")) {
-                            console.log("[自定义处理] 拦截并替换了 alert('删除成功！')");
-
-                            // 移除原始脚本节点
-                            node.parentNode.removeChild(node);
-
-                            // 可以执行新的脚本
-                            const newScript = document.createElement("script");
-                            newScript.textContent = "console.log('删除成功，但弹窗已被替代。');"; // 自定义提示
-                            document.body.appendChild(newScript);
-                        }
-                    }
-                });
-            });
-        });
+    function hookAllFrames() {
+        hookWindow(window, 'top');
+        for (let i = 0; i < window.frames.length; i++) {
+            hookWindow(window.frames[i], `frame-${i}`);
+        }
     }
+
+
 
 
 
@@ -179,47 +241,35 @@
     // 初始化函数（保留第一个脚本的核心逻辑）
     function initialize() {
         try {
+            const currentUrl = window.location.href;
+            console.log("currentUrl", currentUrl)
 
-            //获取发票列表
-            const list = extractTableInformation();
-            console.log("list", list);
-            if (list && list.length > 0) {
-                setupAutoAlert();
-                const result = safeClickDeleteButton(list[0]);
-                console.log("return", result.success, result.reason, result.error);
-                alert("line181");
-                confirm("line191");
-            }
+            createFloatingButton();
 
-            // 启用 MutationObserver 监听动态插入的脚本
-            // observeMutationsForAlertOverride();
 
-            if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
-                const prm = Sys.WebForms.PageRequestManager.getInstance();
+            //用来覆写原始弹窗函数
+            hookAllFrames();
+            // 持续检测新 iframe
+            setInterval(() => {
+                hookAllFrames();
+            }, 1000);
 
-                prm.add_beginRequest(function (sender, args) {
-                    console.log("AJAX 请求已发送，开始准备处理响应...");
 
-                    // 获取 WebRequest 对象
-                    const webRequest = args.get_request().get_webRequest();
 
-                    // 拦截响应处理逻辑（可以重新定义响应内容）
-                    const originalCallback = webRequest.completed;
-                    webRequest.completed = function () {
-                        const response = webRequest.get_executor();
-                        if (response.get_statusCode() === 200) {
-                            console.log("在响应框架处理前抓取响应内容：", response.get_responseData());
 
-                            // 如果需要，可以对返回的内容进行修改（例如添加自定义标识等）
-                            let modifiedResponse = response.get_responseData().replace("OriginalText", "ModifiedText");
-                            console.log("修改后的响应：", modifiedResponse);
 
-                            // NOTE: 重新定义响应内容需要较深入的 hack 行为，直接覆盖框架层处理逻辑较难，需要结合替换 `webRequest` 中的执行逻辑。
-                        }
-                        originalCallback.apply(this, arguments); // 执行原始的完成回调行为
-                    };
-                });
-            }
+            // //获取发票列表
+            // const list = extractTableInformation();
+            // console.log("list", list);
+            // if (list && list.length > 0) {
+            //     setupAutoAlert();
+            //     const result = safeClickDeleteButton(list[0]);
+            //     console.log("return", result.success, result.reason, result.error);
+            //     alert("line181");
+            //     confirm("line191");
+            // }
+
+
 
 
             // 监听ASP.NET异步回发完成事件
@@ -228,11 +278,7 @@
                 prm.add_endRequest(function (sender, args) {
                     //获取发票列表
                     //extractTableInformation();
-                    confirm("line231");
-                    alert("line232");
-                    setupAutoAlert();
-                    alert("line234");
-                    confirm("line235");
+
 
                     console.log("ASP.NET异步回发完成");
                 });
