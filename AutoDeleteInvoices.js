@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账-批量删除发票1
 // @namespace    http://tampermonkey.net/
-// @version      3.0
+// @version      3.1
 // @description  在我的发票页面，增加批量删除发票功能
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/*
@@ -16,7 +16,7 @@
 // ==/UserScript==
 
 
-//已知bug，插入的停止按钮可能随着页面刷新而消失
+
 /**
  * 发票任务对象
  * @typedef {Object} InvoiceTask
@@ -118,7 +118,7 @@
      * 插入批量删除功能按钮（删除选中发票 / 停止任务 / 展开关闭任务列表）
      * @returns {void}
      */
-    function AutoDeleteInvoice_addButtons() {
+    function AutoDeleteInvoice_addButtons(running = isRunning) {
         // 样式：固定宽度+保留占位
         GM_addStyle(`
             /* 公共按钮样式 */
@@ -171,18 +171,21 @@
             return;
         }
 
+        const delBtnVisibility = running ? "hidden" : "visible";
+        const stopBtnVisibility = running ? "visible" : "hidden";
+
         // 一次性 HTML 拼接三个按钮
         const btnHTML = `
             <span style="display:inline-block;">
                 <input type="button" id="AutoDeleteInvoice_btnDeleteSelected"
                     value="删除选中发票"
                     class="AutoDeleteInvoice_Btn AutoDeleteInvoice_Btn-delete-selected"
-                    style="visibility:visible;"
+                    style="visibility:${delBtnVisibility};"
                     >
                 <input type="button" id="AutoDeleteInvoice_btnStopTask"
                     value="停止任务"
                     class="AutoDeleteInvoice_Btn AutoDeleteInvoice_Btn-stop-task"
-                    style="visibility:hidden;"
+                    style="visibility:${stopBtnVisibility};"
                     >
                 <input type="button" id="AutoDeleteInvoice_btnExpandTaskList"
                     value="展开关闭任务列表"
