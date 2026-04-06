@@ -36,9 +36,6 @@
     const CONFIG = {
         CHECK_INTERVAL: 200,      // 检查间隔
         MAX_WAIT_TIME: 5000,     // 最大等待时间
-        BATCH_DELAY: 3000,        // 批次间延迟
-        PAGE_REFRESH_CHECK: 5000, // 页面刷新检查间隔
-        CLICK_RETRY_LIMIT: 3      // 点击重试次数
     };
 
     /** @type {InvoiceTask[]} */
@@ -113,20 +110,20 @@
         document.body.appendChild(btn);
     }
 
-
+    // 更新UI-任务列表
+    function updateUiDisplay() {
+        //todo
+        //更新任务列表Ui
+    }
 
     // 更新UI-当前任务信息  //current-task-info ID待修改
     function updateCurrentTaskInfo(task) {
-        const taskInfoElement = document.getElementById('current-task-info');
-        if (taskInfoElement) {
-            taskInfoElement.textContent = `当前删除任务: ${task.invoiceNo} (${task.invoiceDate})`;
-        }
-    }
-
-    // 更新UI-任务列表
-    function updateTaskListDisplay() {
+        // const taskInfoElement = document.getElementById('current-task-info');
+        // if (taskInfoElement) {
+        //     taskInfoElement.textContent = `当前删除任务: ${task.invoiceNo} (${task.invoiceDate})`;
+        // }
         //todo
-        //更新任务列表内容
+        //UI中应该有个地方显示当前任务信息
     }
 
     // 切换按钮状态（来自第一个脚本）
@@ -134,16 +131,6 @@
         //todo
         //显示/隐藏各个功能按钮
     }
-
-
-
-
-
-
-
-
-
-
 
     // 获取状态文本（来自第二个脚本）
     function getStatusText(status) {
@@ -157,7 +144,7 @@
         }
     }
 
-    // 检查页面是否忙碌（来自第一个脚本）
+    // 检查页面是否忙碌
     function isPageBusy() {
         // 检查是否有正在进行的异步回发
         if (typeof Sys !== 'undefined' &&
@@ -174,7 +161,7 @@
         return document.readyState !== 'complete';
     }
 
-    // 等待页面状态稳定（来自第一个脚本）
+    // 等待页面状态稳定
     function waitForPageStable(timeout = CONFIG.MAX_WAIT_TIME) {
         return new Promise((resolve) => {
             const startTime = Date.now();
@@ -207,8 +194,7 @@
         return table;
     }
 
-
-    // 定义提取函数
+    // 定义提取函数 ==将ctl00_ContentPlaceHolder1_TR_WDPJ0表格转化为list obj==
     function extractTableInformation() {
         // 获取表格
         const table = document.getElementById('ctl00_ContentPlaceHolder1_TR_WDPJ0');
@@ -276,8 +262,6 @@
     // 构建任务列表
     function createTaskList() {
         const tasks = [];
-        // const list = [];
-        // list = extractTableInformation();
         extractTableInformation().forEach(row => {
             if (row.isChecked) {
                 tasks.push(row);
@@ -289,7 +273,7 @@
 
     /**
      * 安全点击删除按钮
-     * @param {string} buttonId - 删除按钮的 ID（如 ctl00_ContentPlaceHolder1_GV_ZDFPPL_ctl02_Imb_RYDEL）
+     * @param {string} listrow - 删除按钮的 行数据
      * @returns {Promise<Object>} 点击结果，包含成功与否和原因。
      */
     async function safeClickDeleteButton(listrow) {
@@ -374,14 +358,6 @@
         });
     }
 
-
-
-
-
-
-
-
-
     //用于基于list1中的数据，找到list1 list2共有的发票号。并基于list1返回新list
     const findSharedInvoices = (list1, list2) => {
         // 创建一个 Set 用于存储 list2 中的所有发票号
@@ -417,7 +393,7 @@
                 //只替换指定消息的弹窗
                 if (message === "删除成功！" &&
                     win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
-                    Logger.log("我的票夹页面[删除发票]动作收到回调-成功");
+                    Logger.log("我的票夹页面[删除发票]动作收到回调-删除成功");
                 } else {
                     //其余消息放行
                     originalAlert(message);
@@ -465,28 +441,12 @@
 
     /** ==== 串行批量删除逻辑 ==== **/
     async function processDeleteTasks() {
-        // for (let i = 0; i < taskList.length && isRunning; i++) {
-        //     const task = taskList[i];
-        //     updateStatus(`正在删除 ${task.invoiceNo} (${i + 1}/${taskList.length})`);
-        //     await waitForPageStable();
-        //     const clickResult = await safeClickDeleteButton(task);
-        //     if (!clickResult.success) {
-        //         Logger.warn(`删除 ${task.invoiceNo} 失败`);
-        //         continue;
-        //     }
-        //     await waitForDeleteButtonStateChange(task.deleteButtonId);
-        //     // 等一小会防止操作过快
-        //     await new Promise(r => setTimeout(r, 800));
-        // }
-        // isRunning = false;
-        // updateStatus('任务完成');
-
         isRunning = true;
-        toggleButtonState(true);//更新按钮状态
+        toggleButtonState(isRunning);//更新按钮状态
         taskList = createTaskList(); //获取最新状态，并写入全局taskList列表中
-        updateTaskListDisplay();//更新UI-任务列表
+        updateUiDisplay();//更新UI-任务列表
         Logger.log("勾选的发票", taskList);
-        Logger.log("开始串行处理删除选中发票流程...");
+        Logger.log("串行处理删除选中发票流程 开始...");
 
         while (isRunning) {
             const table = getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0');
@@ -502,6 +462,7 @@
             if (workList.length === 0) {
                 Logger.log("所有按钮已处理完毕！");
                 // updateStatus('已完成', `总数量: ${workList.length}`);
+                isRunning = false;
                 break;
             }
 
@@ -509,18 +470,19 @@
             // updateStatus('处理中', `剩余: ${workList.length}`); //TODO
 
             // 只处理第一个按钮
-            // const firstButton = workList[0].buttonElement;
-            // const buttonId = firstButton.id;
-            const firstDelInov = workList[0];
-            const invoiceNo = workList[0].invoiceNo;
+            const firstDelInvoice = workList[0]; //当前要删除的发票行信息
+            const invoiceNo = firstDelInvoice.invoiceNo;
 
             // 查找对应的任务
-            const task = taskList.find(t => t.invoiceNo === invoiceNo);
+            const task = taskList.find(t => t.invoiceNo === invoiceNo);//task为当前任务
             if (task) {
                 task.status = 'processing';
-                updateTaskListDisplay();
+                updateUiDisplay();
                 updateCurrentTaskInfo(task);
             }
+
+            // 检查是否停止
+            if (!isRunning) break;
 
             Logger.log(`准备处理发票，编号: ${invoiceNo} (${workList.length} 个剩余)`);
 
@@ -532,41 +494,42 @@
                 if (!isRunning) break;
 
                 // 安全点击按钮
-                // const clickResult = await safeClickBoundButton(firstButton);
-                const clickResult = await safeClickDeleteButton(firstDelInov);
-
-                if (!clickResult.success) {
+                const clickResult = await safeClickDeleteButton(firstDelInvoice);
+                if (!clickResult.success) { //删除按钮点击不成功处理
                     Logger.warn(`发票编号: ${invoiceNo} 删除按钮点击失败: ${clickResult.reason}`);
-
-                    if (clickResult.reason === 'stopped') {
-                        break;
-                    }
 
                     // 更新任务状态
                     if (task) {
-                        if (clickResult.reason === 'button_unavailable') {
-                            task.status = 'skipped';
-                        } else {
-                            task.status = 'failed';
+                        switch (clickResult.reason) {
+                            case 'button_not_found': //不存在
+                                task.status = 'skipped';
+                                break;
+
+                            case 'button_unavailable': //不可用
+                                task.status = 'failed';
+                                break;
+
+                            default:
+                                break;
                         }
-                        updateTaskListDisplay();
+                        updateUiDisplay();
                     }
 
-                    // 如果按钮不可用，继续处理下一个
-                    continue;
+                    // 如果按钮不存在、不可用，继续处理下一个
+                    continue;//跳过后续，重新执行 while (isRunning) {
                 }
 
                 // 等待按钮状态变化
-                const result = await waitForDeleteButtonStateChange(firstDelInov);
-                Logger.log(`发票编号:${invoiceNo}删除按钮 处理结果:`, result);
+                const buttonResult = await waitForDeleteButtonStateChange(firstDelInvoice);
+                Logger.log(`发票编号:${invoiceNo}删除按钮 处理结果:`, buttonResult);
                 // 更新任务状态
                 if (task) {
-                    if (result.success) {
+                    if (buttonResult.success) {
                         task.status = 'success';
                     } else {
                         task.status = 'failed';
                     }
-                    updateTaskListDisplay();
+                    updateUiDisplay();
                 }
 
                 // 检查是否停止
@@ -578,22 +541,21 @@
                 // 更新任务状态
                 if (task) {
                     task.status = 'failed';
-                    updateTaskListDisplay();
+                    updateUiDisplay();
                 }
 
-                // 等待期间检查是否停止
-                for (let i = 0; i < 20 && isRunning; i++) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
+                // // 等待期间检查是否停止
+                // for (let i = 0; i < 20 && isRunning; i++) {
+                //     await new Promise(resolve => setTimeout(resolve, 100));
+                // }
 
                 if (!isRunning) break;
             }
         }
+        isRunning = false;
+        toggleButtonState(isRunning);//更新按钮状态
+        Logger.log("串行处理删除选中发票流程 结束...");
     }
-
-
-
-
 
 
     // 初始化函数（保留第一个脚本的核心逻辑）
@@ -614,24 +576,6 @@
             setInterval(() => {
                 hookAllFrames();
             }, 1000);
-
-
-
-
-
-            //原来的业务代码
-            // //获取发票列表
-            // const list = extractTableInformation();
-            // Logger.log("list", list);
-            // if (list && list.length > 0) {
-            //     setupAutoAlert();
-            //     const result = safeClickDeleteButton(list[0]);
-            //     Logger.log("return", result.success, result.reason, result.error);
-            //     alert("line181");
-            //     confirm("line191");
-            // }
-
-
 
 
             // 监听ASP.NET异步回发完成事件
