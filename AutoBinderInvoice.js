@@ -576,6 +576,38 @@
         currentTaskEl.textContent = `当前任务：${task.invoiceNo || ''} (${task.invoiceDate || ''}) ${task.totalAmount != null ? task.totalAmount : ''} 元`;
     }
 
+    /**
+     * 切换按钮显示状态（适配新UI）
+     * @param {boolean} running - 是否正在执行任务
+     */
+    function AutoBindInvoice_toggleButtonState(running) {
+        const btnBind = document.getElementById('AutoBindInvoice_btnBindAll');
+        const btnUnbind = document.getElementById('AutoBindInvoice_btnUnbindAll');
+        const btnStop = document.getElementById('AutoBindInvoice_btnStopTask');
+        const btnClear = document.getElementById('AutoBindInvoice_btnClearList');
+        const btnToggle = document.getElementById('AutoBindInvoice_btnTogglePanel');
+
+        // 绑定按钮
+        if (btnBind) {
+            btnBind.style.display = running ? 'none' : 'inline-flex';
+        }
+        // 解绑按钮
+        if (btnUnbind) {
+            btnUnbind.style.display = running ? 'none' : 'inline-flex';
+        }
+        // 停止按钮
+        if (btnStop) {
+            btnStop.style.display = running ? 'inline-flex' : 'none';
+        }
+        // 清除列表按钮（可选隐藏，建议不给隐藏）
+        if (btnClear) {
+            btnClear.disabled = running; //运行中禁用防止误操作
+        }
+        // 展开/收起按钮始终显示
+        if (btnToggle) {
+            btnToggle.disabled = false;
+        }
+    }
 
     
     /** ==== 公共函数  ==== **/
@@ -673,225 +705,231 @@
 
 
 
-    // 添加悬浮控制面板（来自第二个脚本）
-    function addFloatingControlPanel() {
-        if (document.getElementById('auto-bind-control-panel')) {
-            return;
-        }
+    // // 添加悬浮控制面板（来自第二个脚本）
+    // function addFloatingControlPanel() {
+    //     if (document.getElementById('auto-bind-control-panel')) {
+    //         return;
+    //     }
 
-        controlPanel = document.createElement('div');
-        controlPanel.id = 'auto-bind-control-panel';
-        controlPanel.innerHTML = `
-            <div class="panel-header">
-                <div class="control-buttons">
-                    <button id="start-auto-bind-btn" class="btn btn-startBond" style="visibility: visible;">
-                        一键[绑定]<br>本页所有发票
-                    </button>
-                    <button id="start-auto-unbind-btn" class="btn btn-startUnbond" style="visibility: visible;">
-                        一键[绑定]<br>本页所有发票
-                    </button>
-                    <button id="stop-auto-bind-btn" class="btn btn-stop" style="visibility: hidden;">
-                        停止<br>任务
-                    </button>
-                    <button id="clear-tasks-btn" class="btn btn-clear" style="visibility: visible;">
-                        清除<br>列表
-                    </button>
-                    <button id="toggle-detail-btn" class="btn btn-toggle">
-                    <span id="toggle-icon">►</span> 展开<br>详情
-                    </button>
-                </div>
-            </div>
-            <div id="detail-section" class="collapsed">
-            <div class="status-bar">
-                <div class="status-item">
-                    <div class="status-label">可绑定/解绑数</div>
-                    <div id="total-tasks" class="status-value">0</div>
-                </div>
-                <div class="status-item">
-                    <div class="status-label">已完成</div>
-                    <div id="completed-tasks" class="status-value">0</div>
-                </div>
-                <div class="status-item">
-                    <div class="status-label">失败</div>
-                    <div id="failed-tasks" class="status-value">0</div>
-                </div>
-            </div>
-            <div id="task-list-container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <div style="font-weight: bold; color: #333;">任务列表</div>
-                    <div id="current-task-info" style="font-size: 12px; color: #666;">当前任务: -</div>
-                </div>
-                <div id="task-list" class="task-list">
-                    <!-- 任务列表将在这里动态添加 -->
-                </div>
-            </div>
-            </div>
-        `;
+    //     controlPanel = document.createElement('div');
+    //     controlPanel.id = 'auto-bind-control-panel';
+    //     controlPanel.innerHTML = `
+    //         <div class="panel-header">
+    //             <div class="control-buttons">
+    //                 <button id="start-auto-bind-btn" class="btn btn-startBond" style="visibility: visible;">
+    //                     一键[绑定]<br>本页所有发票
+    //                 </button>
+    //                 <button id="start-auto-unbind-btn" class="btn btn-startUnbond" style="visibility: visible;">
+    //                     一键[绑定]<br>本页所有发票
+    //                 </button>
+    //                 <button id="stop-auto-bind-btn" class="btn btn-stop" style="visibility: hidden;">
+    //                     停止<br>任务
+    //                 </button>
+    //                 <button id="clear-tasks-btn" class="btn btn-clear" style="visibility: visible;">
+    //                     清除<br>列表
+    //                 </button>
+    //                 <button id="toggle-detail-btn" class="btn btn-toggle">
+    //                 <span id="toggle-icon">►</span> 展开<br>详情
+    //                 </button>
+    //             </div>
+    //         </div>
+    //         <div id="detail-section" class="collapsed">
+    //         <div class="status-bar">
+    //             <div class="status-item">
+    //                 <div class="status-label">可绑定/解绑数</div>
+    //                 <div id="total-tasks" class="status-value">0</div>
+    //             </div>
+    //             <div class="status-item">
+    //                 <div class="status-label">已完成</div>
+    //                 <div id="completed-tasks" class="status-value">0</div>
+    //             </div>
+    //             <div class="status-item">
+    //                 <div class="status-label">失败</div>
+    //                 <div id="failed-tasks" class="status-value">0</div>
+    //             </div>
+    //         </div>
+    //         <div id="task-list-container">
+    //             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+    //                 <div style="font-weight: bold; color: #333;">任务列表</div>
+    //                 <div id="current-task-info" style="font-size: 12px; color: #666;">当前任务: -</div>
+    //             </div>
+    //             <div id="task-list" class="task-list">
+    //                 <!-- 任务列表将在这里动态添加 -->
+    //             </div>
+    //         </div>
+    //         </div>
+    //     `;
 
-        document.body.appendChild(controlPanel);
-        bindControlEvents();
-        Logger.log("悬浮控制面板已添加");
-    }
+    //     document.body.appendChild(controlPanel);
+    //     bindControlEvents();
+    //     Logger.log("悬浮控制面板已添加");
+    // }
 
-    // 更新任务状态显示（来自第二个脚本）
-    function updateTaskStatus() {
-        const totalTasks = taskList.length;
-        const completedTasks = taskList.filter(t => t.status === 'success').length;
-        const failedTasks = taskList.filter(t => t.status === 'failed').length;
+    // // 更新任务状态显示（来自第二个脚本）
+    // function updateTaskStatus() {
+    //     const totalTasks = taskList.length;
+    //     const completedTasks = taskList.filter(t => t.status === 'success').length;
+    //     const failedTasks = taskList.filter(t => t.status === 'failed').length;
 
-        document.getElementById('total-tasks').textContent = totalTasks;
-        document.getElementById('completed-tasks').textContent = completedTasks;
-        document.getElementById('failed-tasks').textContent = failedTasks;
-    }
+    //     document.getElementById('total-tasks').textContent = totalTasks;
+    //     document.getElementById('completed-tasks').textContent = completedTasks;
+    //     document.getElementById('failed-tasks').textContent = failedTasks;
+    // }
 
-    // 更新任务列表显示（修改添加合计列）
-    function updateTaskListDisplay() {
-        const taskListContainer = document.getElementById('task-list');
-        if (!taskListContainer) return;
+    // // 更新任务列表显示（修改添加合计列）
+    // function updateTaskListDisplay() {
+    //     const taskListContainer = document.getElementById('task-list');
+    //     if (!taskListContainer) return;
 
-        taskListContainer.innerHTML = '';
+    //     taskListContainer.innerHTML = '';
 
-        // 添加标题行
-        const header = document.createElement('div');
-        header.className = 'task-header';
-        header.innerHTML = `
-            <div class="task-column invoice-no">发票号</div>
-            <div class="task-column invoice-date">开票日期</div>
-            <div class="task-column total-amount">合计</div>
-            <div class="task-column button-id">按钮ID</div>
-            <div class="task-column task-status">状态</div>
-        `;
-        taskListContainer.appendChild(header);
+    //     // 添加标题行
+    //     const header = document.createElement('div');
+    //     header.className = 'task-header';
+    //     header.innerHTML = `
+    //         <div class="task-column invoice-no">发票号</div>
+    //         <div class="task-column invoice-date">开票日期</div>
+    //         <div class="task-column total-amount">合计</div>
+    //         <div class="task-column button-id">按钮ID</div>
+    //         <div class="task-column task-status">状态</div>
+    //     `;
+    //     taskListContainer.appendChild(header);
 
-        // 添加任务行
-        taskList.forEach(task => {
-            const taskItem = document.createElement('div');
-            taskItem.className = 'task-item';
-            taskItem.innerHTML = `
-                <div class="task-column invoice-no" title="${task.invoiceNo}">${task.invoiceNo}</div>
-                <div class="task-column invoice-date">${task.invoiceDate}</div>
-                <div class="task-column total-amount">${task.totalAmount}</div>
-                <div class="task-column button-id">${task.buttonId}</div>
-                <div class="task-column task-status status-${task.status}">
-                    ${getStatusText(task.status)}
-                </div>
-            `;
-            taskListContainer.appendChild(taskItem);
-        });
+    //     // 添加任务行
+    //     taskList.forEach(task => {
+    //         const taskItem = document.createElement('div');
+    //         taskItem.className = 'task-item';
+    //         taskItem.innerHTML = `
+    //             <div class="task-column invoice-no" title="${task.invoiceNo}">${task.invoiceNo}</div>
+    //             <div class="task-column invoice-date">${task.invoiceDate}</div>
+    //             <div class="task-column total-amount">${task.totalAmount}</div>
+    //             <div class="task-column button-id">${task.buttonId}</div>
+    //             <div class="task-column task-status status-${task.status}">
+    //                 ${getStatusText(task.status)}
+    //             </div>
+    //         `;
+    //         taskListContainer.appendChild(taskItem);
+    //     });
 
-        updateTaskStatus();
-    }
-
-
+    //     updateTaskStatus();
+    // }
 
 
-    // 更新状态显示（来自第一个脚本）
-    function updateStatus(status, progress = '') {
-        const statusElement = document.getElementById('bind-status');
-        const progressElement = document.getElementById('bind-progress');
-
-        if (statusElement) {
-            statusElement.textContent = `状态: ${status}`;
-        }
-
-        if (progressElement) {
-            progressElement.textContent = progress;
-        }
-    }
-
-    // 切换按钮状态（来自第一个脚本）
-    function toggleButtonState(isRunning) {
-        const startBtn = document.getElementById('start-auto-bind-btn');
-        const unbindBtn = document.getElementById('start-auto-unbind-btn');
-
-        const stopBtn = document.getElementById('stop-auto-bind-btn');
-        const clearBtn = document.getElementById('clear-tasks-btn');
-
-        const toggleBtn = document.getElementById('toggle-detail-btn');
-
-        if (startBtn) {
-            startBtn.style.visibility = isRunning ? 'hidden' : 'visible';
-        }
-
-        if (unbindBtn) {
-            unbindBtn.style.visibility = isRunning ? 'hidden' : 'visible';
-        }
-
-        if (stopBtn) {
-            stopBtn.style.visibility = isRunning ? 'visible' : 'hidden';
-        }
-    }
-
-    // 绑定按钮事件（合并两个脚本的事件处理）
-    function bindControlEvents() {
-        const startBtn = document.getElementById('start-auto-bind-btn');
-        const stopBtn = document.getElementById('stop-auto-bind-btn');
-        const clearBtn = document.getElementById('clear-tasks-btn');
-        const toggleBtn = document.getElementById('toggle-detail-btn');
-        const unbindBtn = document.getElementById('start-auto-unbind-btn');
-        //console.log(isRunning);
-
-        if (startBtn) {
-            startBtn.addEventListener('click', async function () {
-                if (!isRunning) {
-                    Logger.log("开始自动绑定流程...");
-                    taskList = [];
-                    setupAutoConfirm();
-                    await processAutoBoundButtonsSerially();
-                }
-            });
-        }
-
-        if (unbindBtn) {
-            unbindBtn.addEventListener('click', async function () {
-                if (!isRunning) {
-                    Logger.log("开始自动解绑流程...");
-                    taskList = [];
-                    setupAutoConfirm();
-                    await processAutoUnoundButtonsSerially();
-                }
-            });
-        }
-
-        if (stopBtn) {
-            stopBtn.addEventListener('click', function () {
-                Logger.log("用户手动停止绑定流程");
-                isRunning = false;
-            });
-        }
-
-        if (clearBtn) {
-            clearBtn.addEventListener('click', function () {
-                Logger.log("清空任务列表");
-                taskList = [];
-                updateTaskListDisplay();
-                document.getElementById('current-task-info').textContent = '当前任务: -';
-            });
-        }
-
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', function () {
-                Logger.log("展开/折叠详情");
-                //console.log(toggleBtn);
-                const detailSection = document.getElementById('detail-section');
-                const toggleIcon = document.getElementById('toggle-icon');
-
-                if (detailSection.classList.contains('collapsed')) {
-                    // 展开详情
-                    detailSection.classList.remove('collapsed');
-                    toggleIcon.textContent = '▼';
-                    toggleBtn.innerHTML = `<span id="toggle-icon">▼</span> 收起<br>详情`;
-                } else {
-                    // 折叠详情
-                    detailSection.classList.add('collapsed');
-                    toggleIcon.textContent = '►';
-                    toggleBtn.innerHTML = `<span id="toggle-icon">►</span> 展开<br>详情`;
-                }
-            });
-        }
-    }
 
 
+    // // 更新状态显示（来自第一个脚本）
+    // function updateStatus(status, progress = '') {
+    //     const statusElement = document.getElementById('bind-status');
+    //     const progressElement = document.getElementById('bind-progress');
+
+    //     if (statusElement) {
+    //         statusElement.textContent = `状态: ${status}`;
+    //     }
+
+    //     if (progressElement) {
+    //         progressElement.textContent = progress;
+    //     }
+    // }
+
+    // // 切换按钮状态（来自第一个脚本）
+    // function toggleButtonState(isRunning) {
+    //     const startBtn = document.getElementById('start-auto-bind-btn');
+    //     const unbindBtn = document.getElementById('start-auto-unbind-btn');
+
+    //     const stopBtn = document.getElementById('stop-auto-bind-btn');
+    //     const clearBtn = document.getElementById('clear-tasks-btn');
+
+    //     const toggleBtn = document.getElementById('toggle-detail-btn');
+
+    //     if (startBtn) {
+    //         startBtn.style.visibility = isRunning ? 'hidden' : 'visible';
+    //     }
+
+    //     if (unbindBtn) {
+    //         unbindBtn.style.visibility = isRunning ? 'hidden' : 'visible';
+    //     }
+
+    //     if (stopBtn) {
+    //         stopBtn.style.visibility = isRunning ? 'visible' : 'hidden';
+    //     }
+    // }
+
+    // // 绑定按钮事件（合并两个脚本的事件处理）
+    // function bindControlEvents() {
+    //     const startBtn = document.getElementById('start-auto-bind-btn');
+    //     const stopBtn = document.getElementById('stop-auto-bind-btn');
+    //     const clearBtn = document.getElementById('clear-tasks-btn');
+    //     const toggleBtn = document.getElementById('toggle-detail-btn');
+    //     const unbindBtn = document.getElementById('start-auto-unbind-btn');
+    //     //console.log(isRunning);
+
+    //     if (startBtn) {
+    //         startBtn.addEventListener('click', async function () {
+    //             if (!isRunning) {
+    //                 Logger.log("开始自动绑定流程...");
+    //                 taskList = [];
+    //                 setupAutoConfirm();
+    //                 await processAutoBoundButtonsSerially();
+    //             }
+    //         });
+    //     }
+
+    //     if (unbindBtn) {
+    //         unbindBtn.addEventListener('click', async function () {
+    //             if (!isRunning) {
+    //                 Logger.log("开始自动解绑流程...");
+    //                 taskList = [];
+    //                 setupAutoConfirm();
+    //                 await processAutoUnoundButtonsSerially();
+    //             }
+    //         });
+    //     }
+
+    //     if (stopBtn) {
+    //         stopBtn.addEventListener('click', function () {
+    //             Logger.log("用户手动停止绑定流程");
+    //             isRunning = false;
+    //         });
+    //     }
+
+    //     if (clearBtn) {
+    //         clearBtn.addEventListener('click', function () {
+    //             Logger.log("清空任务列表");
+    //             taskList = [];
+    //             updateTaskListDisplay();
+    //             document.getElementById('current-task-info').textContent = '当前任务: -';
+    //         });
+    //     }
+
+    //     if (toggleBtn) {
+    //         toggleBtn.addEventListener('click', function () {
+    //             Logger.log("展开/折叠详情");
+    //             //console.log(toggleBtn);
+    //             const detailSection = document.getElementById('detail-section');
+    //             const toggleIcon = document.getElementById('toggle-icon');
+
+    //             if (detailSection.classList.contains('collapsed')) {
+    //                 // 展开详情
+    //                 detailSection.classList.remove('collapsed');
+    //                 toggleIcon.textContent = '▼';
+    //                 toggleBtn.innerHTML = `<span id="toggle-icon">▼</span> 收起<br>详情`;
+    //             } else {
+    //                 // 折叠详情
+    //                 detailSection.classList.add('collapsed');
+    //                 toggleIcon.textContent = '►';
+    //                 toggleBtn.innerHTML = `<span id="toggle-icon">►</span> 展开<br>详情`;
+    //             }
+    //         });
+    //     }
+    // }
+
+    // // 更新当前任务信息（来自第二个脚本）
+    // function updateCurrentTaskInfo(task) {
+    //     const taskInfoElement = document.getElementById('current-task-info');
+    //     if (taskInfoElement) {
+    //         taskInfoElement.textContent = `当前任务: ${task.invoiceNo} (${task.invoiceDate})(${task.totalAmount})`;
+    //     }
+    // }
 
 
 
@@ -1128,13 +1166,7 @@
         });
     }
 
-    // 更新当前任务信息（来自第二个脚本）
-    function updateCurrentTaskInfo(task) {
-        const taskInfoElement = document.getElementById('current-task-info');
-        if (taskInfoElement) {
-            taskInfoElement.textContent = `当前任务: ${task.invoiceNo} (${task.invoiceDate})(${task.totalAmount})`;
-        }
-    }
+
 
     // 安全点击[绑定]按钮 ===更新好===
     async function safeClickBoundButton(button) {
@@ -1195,9 +1227,9 @@
     // 串行处理函数 一键绑定 功能
     async function processAutoBoundButtonsSerially() {
         isRunning = true;
-        toggleButtonState(true);
+        AutoBindInvoice_toggleButtonState(isRunning);
         taskList = scanTableAndCreateBoundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateBoundTasks函数
-        updateTaskListDisplay();
+        AutoBindInvoice_updateUiDisplay();
         Logger.log("开始串行处理流程...");
         // Logger.log(`[一键绑定]taskList:`);
         // console.log(taskList);
@@ -1240,12 +1272,13 @@
 
             if (workList.length === 0) {
                 Logger.log("所有按钮已处理完毕！");
-                updateStatus('已完成', `总数量: ${workList.length}`);
+                // updateStatus('已完成', `总数量: ${workList.length}`);
+                isRunning = false;
                 break;
             }
 
             // 更新进度
-            updateStatus('处理中', `剩余: ${workList.length}`);
+            // updateStatus('处理中', `剩余: ${workList.length}`);
 
             // 只处理第一个按钮
             const firstButton = workList[0].buttonElement;
@@ -1255,8 +1288,8 @@
             const task = taskList.find(t => t.buttonId === buttonId);
             if (task) {
                 task.status = 'processing';
-                updateTaskListDisplay();
-                updateCurrentTaskInfo(task);
+                AutoBindInvoice_updateUiDisplay();
+                AutoBindInvoice_updateCurrentTaskInfo(task);
             }
 
             Logger.log(`准备处理按钮: ${buttonId} (${workList.length} 个剩余)`);
@@ -1285,7 +1318,7 @@
                         } else {
                             task.status = 'failed';
                         }
-                        updateTaskListDisplay();
+                        AutoBindInvoice_updateUiDisplay();
                     }
 
                     // 如果按钮不可用，继续处理下一个
@@ -1303,7 +1336,7 @@
                     } else {
                         task.status = 'failed';
                     }
-                    updateTaskListDisplay();
+                    AutoBindInvoice_updateUiDisplay();
                 }
 
                 // // 根据结果决定等待时间
@@ -1321,7 +1354,7 @@
                 // 更新任务状态
                 if (task) {
                     task.status = 'failed';
-                    updateTaskListDisplay();
+                    AutoBindInvoice_updateUiDisplay();
                 }
 
                 // // 等待期间检查是否停止
@@ -1334,12 +1367,12 @@
         }
 
         isRunning = false;
-        toggleButtonState(false);
-        updateStatus('已停止');
+        AutoBindInvoice_toggleButtonState(isRunning);
+        // updateStatus('已停止');
 
-        if (!isRunning) {
-            updateStatus('已完成');
-        }
+        // if (!isRunning) {
+        //     updateStatus('已完成');
+        // }
 
         Logger.log("处理流程结束");
     }
@@ -1347,9 +1380,9 @@
     // 串行处理函数 一键取消绑定 功能
     async function processAutoUnoundButtonsSerially() {
         isRunning = true;
-        toggleButtonState(true);
+        AutoBindInvoice_toggleButtonState(isRunning);
         taskList = scanTableAndCreateUnboundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateUnboundTasks函数
-        updateTaskListDisplay();
+        AutoBindInvoice_updateUiDisplay();
         Logger.log("开始串行处理流程...");
         //Logger.log(`[一键取消绑定]taskList:`);
         //console.log(taskList);
@@ -1392,12 +1425,13 @@
 
             if (workList.length === 0) {
                 Logger.log("所有按钮已处理完毕！");
-                updateStatus('已完成', `总数量: ${workList.length}`);
+                // updateStatus('已完成', `总数量: ${workList.length}`);
+                isRunning = false;
                 break;
             }
 
             // 更新进度
-            updateStatus('处理中', `剩余: ${workList.length}`);
+            // updateStatus('处理中', `剩余: ${workList.length}`);
 
             // 只处理倒数第一个按钮
             const firstButton = workList[workList.length - 1].buttonElement;
@@ -1407,8 +1441,8 @@
             const task = taskList.find(t => t.buttonId === buttonId);
             if (task) {
                 task.status = 'processing';
-                updateTaskListDisplay();
-                updateCurrentTaskInfo(task);
+                AutoBindInvoice_updateUiDisplay();
+                AutoBindInvoice_updateCurrentTaskInfo(task);
             }
 
             Logger.log(`准备处理按钮: ${buttonId} (${workList.length} 个剩余)`);
@@ -1437,7 +1471,7 @@
                         } else {
                             task.status = 'failed';
                         }
-                        updateTaskListDisplay();
+                        AutoBindInvoice_updateUiDisplay();
                     }
 
                     // 如果按钮不可用，继续处理下一个
@@ -1455,7 +1489,7 @@
                     } else {
                         task.status = 'failed';
                     }
-                    updateTaskListDisplay();
+                    AutoBindInvoice_updateUiDisplay();
                 }
 
                 // // 根据结果决定等待时间
@@ -1473,7 +1507,7 @@
                 // 更新任务状态
                 if (task) {
                     task.status = 'failed';
-                    updateTaskListDisplay();
+                    AutoBindInvoice_updateUiDisplay();
                 }
 
                 // // 等待期间检查是否停止
@@ -1486,12 +1520,12 @@
         }
 
         isRunning = false;
-        toggleButtonState(false);
-        updateStatus('已停止');
+        AutoBindInvoice_toggleButtonState(isRunning);
+        // updateStatus('已停止');
 
-        if (!isRunning) {
-            updateStatus('已完成');
-        }
+        // if (!isRunning) {
+        //     updateStatus('已完成');
+        // }
 
         Logger.log("处理流程结束");
     }
@@ -1501,7 +1535,9 @@
     function initialize() {
         try {
             // 添加悬浮控制面板
-            addFloatingControlPanel();
+            // addFloatingControlPanel();
+            AutoBindInvoice_createTaskPanel();
+            AutoBindInvoice_bindButtonsEvents();
 
             //在<tr id="tr_bd">后插入空行
             addEmptyRowAfterTrBd();
