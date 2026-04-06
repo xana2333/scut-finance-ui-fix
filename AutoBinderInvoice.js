@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         SCUT财务系统UI优化-网上报账-一键绑定/解绑发票
+// @name         SCUT财务系统UI优化-网上报账-一键绑定/解绑发票1
 // @namespace    http://tampermonkey.net/
 // @version      11.4
 // @description  在税票录入页面，增加一键绑定、一键解绑功能
@@ -283,15 +283,15 @@
             /* 面板整体 */
             .AutoBindInvoice_panel {
                 position: fixed;
-                top: 60px;
-                left: 50%;
+                top: 185px;
+                left: 45%;
                 transform: translateX(-50%);
                 z-index: 99999;
                 background-color: rgba(255, 255, 255, 0.95);
                 border: 1px solid #ccc;
                 border-radius: 8px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                width: 700px;
+                max-width: 700px;
                 font-family: 'Microsoft YaHei', sans-serif;
             }
             /* 公共按钮样式 */
@@ -360,7 +360,7 @@
 
             /* 任务表格 */
             .AutoBindInvoice_taskTable {
-                width: 100%;
+                min-width: 430px;
                 border-collapse: collapse;
                 table-layout: fixed;
             }
@@ -513,7 +513,6 @@
 
 
     /** ==== 更新 UI内容部分 ==== **/
-
     /**
      * 刷新任务面板显示
      * 使用全局 taskList 数据
