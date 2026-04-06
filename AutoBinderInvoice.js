@@ -75,7 +75,7 @@
 
     /** ==== 构建 UI部分 ==== **/
     /** ==== 创建任务列表面板（包含按钮和折叠区） ==== **/
-    function AutoBindInvoice_createTaskPanel() {
+    function AutoBindInvoice_createTaskPanel(running=isRunning) {
         if (document.getElementById('AutoBindInvoice_taskPanel')) return;
 
         GM_addStyle(`
@@ -186,23 +186,26 @@
             .AutoBindInvoice_statusSkipped { background-color: #FF9800; color: #fff; }
         `);
 
+        const runningBtnVisibility = running ? "hidden" : "visible";
+        const notrunBtnVisibility = running ? "visible" : "hidden";
+
         const panelHTML = `
             <div id="AutoBindInvoice_taskPanel" class="AutoBindInvoice_panel">
                 <!-- 顶部按钮栏 -->
                 <div class="AutoBindInvoice_buttonRow">
-                    <button id="AutoBindInvoice_btnBindAll" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-bind">
+                    <button id="AutoBindInvoice_btnBindAll" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-bind" style="visibility:${runningBtnVisibility};">
                         一键[绑定]</span><br>本页所有发票
                     </button>
-                    <button id="AutoBindInvoice_btnUnbindAll" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-unbind">
+                    <button id="AutoBindInvoice_btnUnbindAll" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-unbind" style="visibility:${runningBtnVisibility};">
                         一键[取消绑定]<br>本页所有发票
                     </button>
-                    <button id="AutoBindInvoice_btnStopTask" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-stop" style="visibility:hidden;">
+                    <button id="AutoBindInvoice_btnStopTask" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-stop" style="visibility:${notrunBtnVisibility};">
                         停止<br>任务
                     </button>
-                    <button id="AutoBindInvoice_btnClearList" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-clear">
+                    <button id="AutoBindInvoice_btnClearList" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-clear" style="visibility:visible;">
                         清除<br>列表
                     </button>
-                    <button id="AutoBindInvoice_btnTogglePanel" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-toggle">
+                    <button id="AutoBindInvoice_btnTogglePanel" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-toggle" style="visibility:visible;">
                         展开<br>列表
                     </button>
                 </div>
