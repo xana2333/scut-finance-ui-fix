@@ -15,6 +15,8 @@
 // @grant        GM_unregisterMenuCommand
 // ==/UserScript==
 
+
+//已知bug，插入的停止按钮可能随着页面刷新而消失
 /**
  * 发票任务对象
  * @typedef {Object} InvoiceTask
