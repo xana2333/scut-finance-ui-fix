@@ -42,7 +42,15 @@
     let taskList = [];
 
     /** ==== 变量 ==== **/
+    /**
+     * 是否正在批量运行删除任务
+     * @type {boolean}
+     */
     let isRunning = false;
+    /**
+     * 控制面板 DOM 元素
+     * @type {HTMLElement|null}
+     */
     let controlPanel = null;
 
 
@@ -116,9 +124,14 @@
         //更新任务列表Ui
     }
 
-    // 更新UI-当前任务信息  //current-task-info ID待修改
+
+    /**
+     * 更新 UI 中当前任务信息
+     * @function
+     * @param {InvoiceTask} task - 当前任务对象
+     */
     function updateCurrentTaskInfo(task) {
-        // const taskInfoElement = document.getElementById('current-task-info');
+        // const taskInfoElement = document.getElementById('current-task-info');//current-task-info ID待修改
         // if (taskInfoElement) {
         //     taskInfoElement.textContent = `当前删除任务: ${task.invoiceNo} (${task.invoiceDate})`;
         // }
@@ -126,13 +139,24 @@
         //UI中应该有个地方显示当前任务信息
     }
 
-    // 切换按钮状态（来自第一个脚本）
+
+    /**
+     * 切换按钮状态
+     * @function
+     * @param {boolean} [Running=isRunning] - 是否处于运行状态
+     */
     function toggleButtonState(Running = isRunning) {
         //todo
         //显示/隐藏各个功能按钮
     }
 
-    // 获取状态文本（来自第二个脚本）
+
+    /**
+     * 根据状态码返回状态文本
+     * @function
+     * @param {'pending' | 'processing' | 'success' | 'failed' | 'skipped'} status - 任务状态代码
+     * @returns {string} 对应的中文状态文本
+     */
     function getStatusText(status) {
         switch (status) {
             case 'pending': return '待执行';
@@ -144,7 +168,12 @@
         }
     }
 
-    // 检查页面是否忙碌
+
+    /**
+     * 检查页面是否忙碌（异步回发或未完全加载）
+     * @function
+     * @returns {boolean} 页面是否忙碌
+     */
     function isPageBusy() {
         // 检查是否有正在进行的异步回发
         if (typeof Sys !== 'undefined' &&
@@ -161,7 +190,12 @@
         return document.readyState !== 'complete';
     }
 
-    // 等待页面状态稳定
+    /**
+     * 等待页面状态稳定
+     * @function
+     * @param {number} [timeout=CONFIG.MAX_WAIT_TIME] - 最大等待时间（毫秒）
+     * @returns {Promise<boolean>} 页面是否在超时前稳定
+     */
     function waitForPageStable(timeout = CONFIG.MAX_WAIT_TIME) {
         return new Promise((resolve) => {
             const startTime = Date.now();
@@ -185,7 +219,12 @@
         });
     }
 
-    // 获取目标表格--参数化目标表格id ===更新好===
+    /**
+     * 获取表格元素
+     * @function
+     * @param {string} [ElementId='ctl00_ContentPlaceHolder1_TR_WDPJ0'] - 表格的 DOM 元素 ID
+     * @returns {HTMLTableElement|null} 目标表格 DOM 元素
+     */
     function getTable(ElementId = 'ctl00_ContentPlaceHolder1_TR_WDPJ0') {
         const table = document.getElementById(ElementId);
         if (!table) {
@@ -194,7 +233,14 @@
         return table;
     }
 
-    // 定义提取函数 ==将ctl00_ContentPlaceHolder1_TR_WDPJ0表格转化为list obj==
+
+    /**
+     * 从发票表格中提取任务列表
+     * @function
+     * @returns {InvoiceTask[]} 发票任务列表
+     * @changelog
+     * 将ctl00_ContentPlaceHolder1_TR_WDPJ0表格转化为list obj
+     */
     function extractTableInformation() {
         // 获取表格
         const table = document.getElementById('ctl00_ContentPlaceHolder1_TR_WDPJ0');
@@ -259,7 +305,11 @@
 
     }
 
-    // 构建任务列表
+    /**
+     * 创建勾选的任务列表
+     * @function
+     * @returns {InvoiceTask[]} 已勾选的任务列表
+     */
     function createTaskList() {
         const tasks = [];
         extractTableInformation().forEach(row => {
@@ -273,8 +323,10 @@
 
     /**
      * 安全点击删除按钮
-     * @param {string} listrow - 删除按钮的 行数据
-     * @returns {Promise<Object>} 点击结果，包含成功与否和原因。
+     * @async
+     * @function
+     * @param {InvoiceTask} listrow - 发票任务对象
+     * @returns {Promise<{success:boolean, reason?:string, error?:Error}>} 点击结果
      */
     async function safeClickDeleteButton(listrow) {
         try {
@@ -313,7 +365,15 @@
         }
     }
 
-    // 等待[删除]按钮状态变化 ---增加基于发票号是否存在 判断是否成功---
+    /**
+     * 等待删除按钮状态变化（或发票行消失）
+     * @function
+     * @param {InvoiceTask} tablerow - 发票任务对象
+     * @param {number} [timeout=CONFIG.MAX_WAIT_TIME] - 最大等待时间
+     * @returns {Promise<{success:boolean, reason:string}>} 变化检测结果
+     * @changelog
+     * 增加基于发票号是否存在 判断是否成功
+     */
     function waitForDeleteButtonStateChange(tablerow, timeout = CONFIG.MAX_WAIT_TIME) {
         return new Promise((resolve) => {
             const startTime = Date.now();
@@ -358,7 +418,13 @@
         });
     }
 
-    //用于基于list1中的数据，找到list1 list2共有的发票号。并基于list1返回新list
+    /**
+     * 查找两个任务列表中共同存在的发票
+     * @function
+     * @param {InvoiceTask[]} list1 - 第一个任务列表
+     * @param {InvoiceTask[]} list2 - 第二个任务列表
+     * @returns {InvoiceTask[]} 在两个列表中都存在的任务（返回list的每行对象引用自list1）
+     */
     const findSharedInvoices = (list1, list2) => {
         // 创建一个 Set 用于存储 list2 中的所有发票号
         const invoiceNosInList2 = new Set();
@@ -380,7 +446,12 @@
         return resultList;// 返回包含匹配任务的新列表
     }
 
-    // 用于覆写原始windo弹窗函数
+    /**
+     * 覆写窗口对象的 alert 和 confirm
+     * @function
+     * @param {Window} win - 目标窗口对象
+     * @param {string} frameName - 窗口名称（用于日志）
+     */
     function hookWindow(win, frameName) {
         try {
             if (win._alertHooked) return;
@@ -430,7 +501,10 @@
             Logger.warn("Cannot hook frame:", frameName, e);
         }
     }
-    // 用于覆写原始windo弹窗函数
+    /**
+     * 覆写所有 frame 的 alert 和 confirm
+     * @function
+     */
     function hookAllFrames() {
         hookWindow(window, 'top');
         for (let i = 0; i < window.frames.length; i++) {
@@ -438,8 +512,12 @@
         }
     }
 
-
-    /** ==== 串行批量删除逻辑 ==== **/
+    /**
+     * 串行删除勾选的发票 主要工作逻辑函数
+     * @async
+     * @function
+     * @returns {Promise<void>}
+     */
     async function processDeleteTasks() {
         isRunning = true;
         toggleButtonState(isRunning);//更新按钮状态
@@ -558,7 +636,11 @@
     }
 
 
-    // 初始化函数（保留第一个脚本的核心逻辑）
+    /**
+     * 初始化脚本
+     * @function
+     * @returns {void}
+     */
     function initialize() {
         try {
             const currentUrl = window.location.href;
