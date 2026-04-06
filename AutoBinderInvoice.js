@@ -1115,7 +1115,7 @@
             // 添加悬浮控制面板
             // addFloatingControlPanel();
             AutoBindInvoice_createTaskPanel();
-            AutoBindInvoice_bindButtonsEvents();
+            AutoBindInvoice_bindButtonsEvents();//绑定控制面板按钮事件
 
             //在<tr id="tr_bd">后插入空行
             addEmptyRowAfterTrBd();
@@ -1127,6 +1127,7 @@
                     // 重新绑定事件
                     //bindControlEvents();
                     //Logger.log("ASP.NET异步回发完成，重新绑定事件");
+                    
                     //在<tr id="tr_bd">后插入空行
                     addEmptyRowAfterTrBd();
                     Logger.log("ASP.NET异步回发完成，重新插入空行");
