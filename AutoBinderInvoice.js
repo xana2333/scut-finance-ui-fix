@@ -784,6 +784,17 @@
 
 
 
+    // 替换confirm函数（来自第一个脚本）
+    function setupAutoConfirm() {
+        const originalConfirm = window.confirm;
+        window.confirm = function (message) {
+            Logger.log(`自动确认弹窗: "${message}"`);
+            return true; // 自动点击 "确定"
+        };
+    }
+
+
+
     // 扫描表格并创建【绑定】任务列表 ===更新好===
     function scanTableAndCreateBoundTasks() {
         const table = getTable('GV_ZDFPPL');
@@ -934,19 +945,6 @@
 
         return tasks;
     }
-
-    // 替换confirm函数（来自第一个脚本）
-    function setupAutoConfirm() {
-        const originalConfirm = window.confirm;
-        window.confirm = function (message) {
-            Logger.log(`自动确认弹窗: "${message}"`);
-            return true; // 自动点击 "确定"
-        };
-    }
-
-
-
-    
 
     // 等待[绑定]按钮状态变化 ===更新好===
     function waitForBoundButtonStateChange(buttonId, timeout = CONFIG.MAX_WAIT_TIME) {
