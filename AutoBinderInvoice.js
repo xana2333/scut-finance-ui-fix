@@ -359,13 +359,13 @@
         taskList.forEach(task => {
             const row = document.createElement('tr');
             row.innerHTML = `
-            <td class="AutoBindInvoice_invoiceNo">${task.invoiceNo || ''}</td>
-            <td class="AutoBindInvoice_invoiceDate">${task.invoiceDate || ''}</td>
-            <td class="AutoBindInvoice_totalAmount">${task.totalAmount != null ? task.totalAmount : ''}</td>
-            <td class="AutoBindInvoice_statusCol AutoBindInvoice_status${task.status.charAt(0).toUpperCase() + task.status.slice(1)}">
-                ${getStatusText(task.status)}
-            </td>
-        `;
+                <td class="AutoBindInvoice_invoiceNo">${task.invoiceNo || ''}</td>
+                <td class="AutoBindInvoice_invoiceDate">${task.invoiceDate || ''}</td>
+                <td class="AutoBindInvoice_totalAmount">${task.totalAmount != null ? task.totalAmount : ''}</td>
+                <td class="AutoBindInvoice_statusCol AutoBindInvoice_status${task.status.charAt(0).toUpperCase() + task.status.slice(1)}">
+                    ${getStatusText(task.status)}
+                </td>
+            `;
             tbody.appendChild(row);
         });
     }
