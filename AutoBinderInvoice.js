@@ -313,11 +313,11 @@
                 const contentDiv = document.getElementById('AutoBindInvoice_content');
                 if (contentDiv.style.display === 'none' || contentDiv.style.display === '') {
                     contentDiv.style.display = 'block';
-                    btnToggle.value = '收起任务列表';
+                    btnToggle.innerHTML = '收起<br>列表';
                     AutoBindInvoice_updateUiDisplay();
                 } else {
                     contentDiv.style.display = 'none';
-                    btnToggle.value = '展开任务列表';
+                    btnToggle.innerHTML = '展开<br>列表';
                 }
             });
         }
