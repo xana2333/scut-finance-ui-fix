@@ -83,20 +83,21 @@
             .AutoBindInvoice_panel {
                 position: fixed;
                 top: 185px;
-                left: 45%;
+                left: 40%;
                 transform: translateX(-50%);
                 z-index: 99999;
                 background-color: rgba(255, 255, 255, 0.95);
                 border: 1px solid #ccc;
                 border-radius: 8px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                min-width: 446px;
                 max-width: 700px;
                 font-family: 'Microsoft YaHei', sans-serif;
             }
             /* 公共按钮样式 */
             .AutoBindInvoice_Btn {
-                padding: 8px 16px;
-                font-size: 14px;
+                padding: 8px 12px;
+                font-size: 15px;
                 font-weight: bold;
                 border: none;
                 border-radius: 4px;
@@ -138,6 +139,7 @@
                 display: flex;
                 gap: 20px;
                 margin-bottom: 8px;
+                justify-content: center; /* 居中 */
             }
             .AutoBindInvoice_statusItem {
                 text-align: center;
@@ -159,7 +161,7 @@
 
             /* 任务表格 */
             .AutoBindInvoice_taskTable {
-                min-width: 430px;
+                min-width: 440px;
                 border-collapse: collapse;
                 table-layout: fixed;
             }
@@ -188,11 +190,21 @@
             <div id="AutoBindInvoice_taskPanel" class="AutoBindInvoice_panel">
                 <!-- 顶部按钮栏 -->
                 <div class="AutoBindInvoice_buttonRow">
-                    <input type="button" id="AutoBindInvoice_btnBindAll" value="一键绑定" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-bind">
-                    <input type="button" id="AutoBindInvoice_btnUnbindAll" value="一键解绑" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-unbind">
-                    <input type="button" id="AutoBindInvoice_btnStopTask" value="停止任务" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-stop" style="display:none;">
-                    <input type="button" id="AutoBindInvoice_btnClearList" value="清除列表" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-clear">
-                    <input type="button" id="AutoBindInvoice_btnTogglePanel" value="展开任务列表" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-toggle">
+                    <button id="AutoBindInvoice_btnBindAll" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-bind">
+                        一键[绑定]</span><br>本页所有发票
+                    </button>
+                    <button id="AutoBindInvoice_btnUnbindAll" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-unbind">
+                        一键[取消绑定]<br>本页所有发票
+                    </button>
+                    <button id="AutoBindInvoice_btnStopTask" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-stop" style="visibility:hidden;">
+                        停止<br>任务
+                    </button>
+                    <button id="AutoBindInvoice_btnClearList" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-clear">
+                        清除<br>列表
+                    </button>
+                    <button id="AutoBindInvoice_btnTogglePanel" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-toggle">
+                        展开<br>列表
+                    </button>
                 </div>
 
                 <!-- 折叠内容区 -->
@@ -387,15 +399,15 @@
 
         // 绑定按钮
         if (btnBind) {
-            btnBind.style.display = running ? 'none' : 'inline-flex';
+            btnBind.style.visibility = running ? 'hidden' : 'visible';
         }
         // 解绑按钮
         if (btnUnbind) {
-            btnUnbind.style.display = running ? 'none' : 'inline-flex';
+            btnUnbind.style.visibility = running ? 'hidden' : 'visible';
         }
         // 停止按钮
         if (btnStop) {
-            btnStop.style.display = running ? 'inline-flex' : 'none';
+            btnStop.style.visibility = running ? 'visible' : 'hidden';
         }
         // 清除列表按钮（可选隐藏，建议不给隐藏）
         if (btnClear) {
@@ -495,7 +507,7 @@
     }
 
 
-    
+
 
     // 替换confirm函数（来自第一个脚本）
     function setupAutoConfirm() {
