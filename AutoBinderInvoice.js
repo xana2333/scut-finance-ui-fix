@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         SCUT财务系统UI优化-网上报账-一键绑定/解绑发票1
+// @name         SCUT财务系统UI优化-网上报账-一键绑定/解绑发票
 // @namespace    http://tampermonkey.net/
-// @version      11.4
+// @version      12.0
 // @description  在税票录入页面，增加一键绑定、一键解绑功能
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
