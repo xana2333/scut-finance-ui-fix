@@ -560,7 +560,7 @@
     function getTable(ElementId = 'ctl00_ContentPlaceHolder1_TR_WDPJ0') {
         const table = document.getElementById(ElementId);
         if (!table) {
-            Logger.error("未找到 ID 为 " + ElementId + " 的表格。");
+            // Logger.error("未找到 ID 为 " + ElementId + " 的表格。");
         }
         return table;
     }
