@@ -579,7 +579,75 @@
 
     
     /** ==== 公共函数  ==== **/
+    // 获取状态文本（来自第二个脚本）
+    /**
+     * 根据状态码返回状态文本
+     * @function
+     * @param {'pending' | 'processing' | 'success' | 'failed' | 'skipped'} status - 任务状态代码
+     * @returns {string} 对应的中文状态文本
+     */
+    function getStatusText(status) {
+        switch (status) {
+            case 'pending': return '待执行';
+            case 'processing': return '执行中';
+            case 'success': return '成功';
+            case 'failed': return '失败';
+            case 'skipped': return '已跳过';
+            default: return status;
+        }
+    }
 
+    // 检查页面是否忙碌（来自第一个脚本）
+    /**
+     * 检查页面是否忙碌（异步回发或未完全加载）
+     * @function
+     * @returns {boolean} 页面是否忙碌
+     */
+    function isPageBusy() {
+        // 检查是否有正在进行的异步回发
+        if (typeof Sys !== 'undefined' &&
+            Sys.WebForms &&
+            Sys.WebForms.PageRequestManager &&
+            Sys.WebForms.PageRequestManager.getInstance()) {
+            const prm = Sys.WebForms.PageRequestManager.getInstance();
+            if (prm.get_isInAsyncPostBack && prm.get_isInAsyncPostBack()) {
+                return true;
+            }
+        }
+
+        // 检查页面是否在加载中
+        return document.readyState !== 'complete';
+    }
+
+    // 等待页面状态稳定（来自第一个脚本）
+    /**
+     * 等待页面状态稳定
+     * @function
+     * @param {number} [timeout=CONFIG.MAX_WAIT_TIME] - 最大等待时间（毫秒）
+     * @returns {Promise<boolean>} 页面是否在超时前稳定
+     */
+    function waitForPageStable(timeout = CONFIG.MAX_WAIT_TIME) {
+        return new Promise((resolve) => {
+            const startTime = Date.now();
+
+            function checkPageStatus() {
+                if (!isPageBusy()) {
+                    resolve(true);
+                    return;
+                }
+
+                if (Date.now() - startTime >= timeout) {
+                    Logger.warn('等待页面稳定超时');
+                    resolve(false);
+                    return;
+                }
+
+                setTimeout(checkPageStatus, CONFIG.CHECK_INTERVAL);
+            }
+
+            checkPageStatus();
+        });
+    }
 
 
 
@@ -701,23 +769,7 @@
         updateTaskStatus();
     }
 
-    // 获取状态文本（来自第二个脚本）
-        /**
-     * 根据状态码返回状态文本
-     * @function
-     * @param {'pending' | 'processing' | 'success' | 'failed' | 'skipped'} status - 任务状态代码
-     * @returns {string} 对应的中文状态文本
-     */
-    function getStatusText(status) {
-        switch (status) {
-            case 'pending': return '待执行';
-            case 'processing': return '执行中';
-            case 'success': return '成功';
-            case 'failed': return '失败';
-            case 'skipped': return '已跳过';
-            default: return status;
-        }
-    }
+
 
     // 扫描表格并创建【绑定】任务列表 ===更新好===
     function scanTableAndCreateBoundTasks() {
@@ -888,57 +940,7 @@
         return table;
     }
 
-    // 检查页面是否忙碌（来自第一个脚本）
-    /**
-     * 检查页面是否忙碌（异步回发或未完全加载）
-     * @function
-     * @returns {boolean} 页面是否忙碌
-     */
-    function isPageBusy() {
-        // 检查是否有正在进行的异步回发
-        if (typeof Sys !== 'undefined' &&
-            Sys.WebForms &&
-            Sys.WebForms.PageRequestManager &&
-            Sys.WebForms.PageRequestManager.getInstance()) {
-            const prm = Sys.WebForms.PageRequestManager.getInstance();
-            if (prm.get_isInAsyncPostBack && prm.get_isInAsyncPostBack()) {
-                return true;
-            }
-        }
-
-        // 检查页面是否在加载中
-        return document.readyState !== 'complete';
-    }
-
-    // 等待页面状态稳定（来自第一个脚本）
-    /**
-     * 等待页面状态稳定
-     * @function
-     * @param {number} [timeout=CONFIG.MAX_WAIT_TIME] - 最大等待时间（毫秒）
-     * @returns {Promise<boolean>} 页面是否在超时前稳定
-     */
-    function waitForPageStable(timeout = CONFIG.MAX_WAIT_TIME) {
-        return new Promise((resolve) => {
-            const startTime = Date.now();
-
-            function checkPageStatus() {
-                if (!isPageBusy()) {
-                    resolve(true);
-                    return;
-                }
-
-                if (Date.now() - startTime >= timeout) {
-                    Logger.warn('等待页面稳定超时');
-                    resolve(false);
-                    return;
-                }
-
-                setTimeout(checkPageStatus, CONFIG.CHECK_INTERVAL);
-            }
-
-            checkPageStatus();
-        });
-    }
+    
 
     // 等待[绑定]按钮状态变化 ===更新好===
     function waitForBoundButtonStateChange(buttonId, timeout = CONFIG.MAX_WAIT_TIME) {
