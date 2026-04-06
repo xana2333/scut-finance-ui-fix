@@ -784,6 +784,118 @@
 
 
 
+
+    // 更新状态显示（来自第一个脚本）
+    function updateStatus(status, progress = '') {
+        const statusElement = document.getElementById('bind-status');
+        const progressElement = document.getElementById('bind-progress');
+
+        if (statusElement) {
+            statusElement.textContent = `状态: ${status}`;
+        }
+
+        if (progressElement) {
+            progressElement.textContent = progress;
+        }
+    }
+
+    // 切换按钮状态（来自第一个脚本）
+    function toggleButtonState(isRunning) {
+        const startBtn = document.getElementById('start-auto-bind-btn');
+        const unbindBtn = document.getElementById('start-auto-unbind-btn');
+
+        const stopBtn = document.getElementById('stop-auto-bind-btn');
+        const clearBtn = document.getElementById('clear-tasks-btn');
+
+        const toggleBtn = document.getElementById('toggle-detail-btn');
+
+        if (startBtn) {
+            startBtn.style.visibility = isRunning ? 'hidden' : 'visible';
+        }
+
+        if (unbindBtn) {
+            unbindBtn.style.visibility = isRunning ? 'hidden' : 'visible';
+        }
+
+        if (stopBtn) {
+            stopBtn.style.visibility = isRunning ? 'visible' : 'hidden';
+        }
+    }
+
+    // 绑定按钮事件（合并两个脚本的事件处理）
+    function bindControlEvents() {
+        const startBtn = document.getElementById('start-auto-bind-btn');
+        const stopBtn = document.getElementById('stop-auto-bind-btn');
+        const clearBtn = document.getElementById('clear-tasks-btn');
+        const toggleBtn = document.getElementById('toggle-detail-btn');
+        const unbindBtn = document.getElementById('start-auto-unbind-btn');
+        //console.log(isRunning);
+
+        if (startBtn) {
+            startBtn.addEventListener('click', async function () {
+                if (!isRunning) {
+                    Logger.log("开始自动绑定流程...");
+                    taskList = [];
+                    setupAutoConfirm();
+                    await processAutoBoundButtonsSerially();
+                }
+            });
+        }
+
+        if (unbindBtn) {
+            unbindBtn.addEventListener('click', async function () {
+                if (!isRunning) {
+                    Logger.log("开始自动解绑流程...");
+                    taskList = [];
+                    setupAutoConfirm();
+                    await processAutoUnoundButtonsSerially();
+                }
+            });
+        }
+
+        if (stopBtn) {
+            stopBtn.addEventListener('click', function () {
+                Logger.log("用户手动停止绑定流程");
+                isRunning = false;
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                Logger.log("清空任务列表");
+                taskList = [];
+                updateTaskListDisplay();
+                document.getElementById('current-task-info').textContent = '当前任务: -';
+            });
+        }
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function () {
+                Logger.log("展开/折叠详情");
+                //console.log(toggleBtn);
+                const detailSection = document.getElementById('detail-section');
+                const toggleIcon = document.getElementById('toggle-icon');
+
+                if (detailSection.classList.contains('collapsed')) {
+                    // 展开详情
+                    detailSection.classList.remove('collapsed');
+                    toggleIcon.textContent = '▼';
+                    toggleBtn.innerHTML = `<span id="toggle-icon">▼</span> 收起<br>详情`;
+                } else {
+                    // 折叠详情
+                    detailSection.classList.add('collapsed');
+                    toggleIcon.textContent = '►';
+                    toggleBtn.innerHTML = `<span id="toggle-icon">►</span> 展开<br>详情`;
+                }
+            });
+        }
+    }
+
+
+
+
+
+
     // 替换confirm函数（来自第一个脚本）
     function setupAutoConfirm() {
         const originalConfirm = window.confirm;
@@ -1384,111 +1496,6 @@
         Logger.log("处理流程结束");
     }
 
-    // 更新状态显示（来自第一个脚本）
-    function updateStatus(status, progress = '') {
-        const statusElement = document.getElementById('bind-status');
-        const progressElement = document.getElementById('bind-progress');
-
-        if (statusElement) {
-            statusElement.textContent = `状态: ${status}`;
-        }
-
-        if (progressElement) {
-            progressElement.textContent = progress;
-        }
-    }
-
-    // 切换按钮状态（来自第一个脚本）
-    function toggleButtonState(isRunning) {
-        const startBtn = document.getElementById('start-auto-bind-btn');
-        const unbindBtn = document.getElementById('start-auto-unbind-btn');
-
-        const stopBtn = document.getElementById('stop-auto-bind-btn');
-        const clearBtn = document.getElementById('clear-tasks-btn');
-
-        const toggleBtn = document.getElementById('toggle-detail-btn');
-
-        if (startBtn) {
-            startBtn.style.visibility = isRunning ? 'hidden' : 'visible';
-        }
-
-        if (unbindBtn) {
-            unbindBtn.style.visibility = isRunning ? 'hidden' : 'visible';
-        }
-
-        if (stopBtn) {
-            stopBtn.style.visibility = isRunning ? 'visible' : 'hidden';
-        }
-    }
-
-    // 绑定按钮事件（合并两个脚本的事件处理）
-    function bindControlEvents() {
-        const startBtn = document.getElementById('start-auto-bind-btn');
-        const stopBtn = document.getElementById('stop-auto-bind-btn');
-        const clearBtn = document.getElementById('clear-tasks-btn');
-        const toggleBtn = document.getElementById('toggle-detail-btn');
-        const unbindBtn = document.getElementById('start-auto-unbind-btn');
-        //console.log(isRunning);
-
-        if (startBtn) {
-            startBtn.addEventListener('click', async function () {
-                if (!isRunning) {
-                    Logger.log("开始自动绑定流程...");
-                    taskList = [];
-                    setupAutoConfirm();
-                    await processAutoBoundButtonsSerially();
-                }
-            });
-        }
-
-        if (unbindBtn) {
-            unbindBtn.addEventListener('click', async function () {
-                if (!isRunning) {
-                    Logger.log("开始自动解绑流程...");
-                    taskList = [];
-                    setupAutoConfirm();
-                    await processAutoUnoundButtonsSerially();
-                }
-            });
-        }
-
-        if (stopBtn) {
-            stopBtn.addEventListener('click', function () {
-                Logger.log("用户手动停止绑定流程");
-                isRunning = false;
-            });
-        }
-
-        if (clearBtn) {
-            clearBtn.addEventListener('click', function () {
-                Logger.log("清空任务列表");
-                taskList = [];
-                updateTaskListDisplay();
-                document.getElementById('current-task-info').textContent = '当前任务: -';
-            });
-        }
-
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', function () {
-                Logger.log("展开/折叠详情");
-                //console.log(toggleBtn);
-                const detailSection = document.getElementById('detail-section');
-                const toggleIcon = document.getElementById('toggle-icon');
-
-                if (detailSection.classList.contains('collapsed')) {
-                    // 展开详情
-                    detailSection.classList.remove('collapsed');
-                    toggleIcon.textContent = '▼';
-                    toggleBtn.innerHTML = `<span id="toggle-icon">▼</span> 收起<br>详情`;
-                } else {
-                    // 折叠详情
-                    detailSection.classList.add('collapsed');
-                    toggleIcon.textContent = '►';
-                    toggleBtn.innerHTML = `<span id="toggle-icon">►</span> 展开<br>详情`;
-                }
-            });
-        }
-    }
 
     // 初始化函数（保留第一个脚本的核心逻辑）
     function initialize() {
