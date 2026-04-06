@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         SCUT财务系统UI优化-网上报账-批量删除发票
+// @name         SCUT财务系统UI优化-网上报账-批量删除发票1
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      3.0
 // @description  在我的发票页面，增加批量删除发票功能
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/*
@@ -9,7 +9,10 @@
 // @match        http://wsyy-cw.webvpn.scut.edu.cn/*
 // @match        https://wsyy-cw.webvpn.scut.edu.cn/*
 // @grant        GM_addStyle
-// @run-at       document-end
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_registerMenuCommand
+// @grant        GM_unregisterMenuCommand
 // ==/UserScript==
 
 /**
@@ -31,6 +34,53 @@
 
 (function () {
     'use strict';
+
+    /** ==== 持久化配置文件相关 ==== **/
+    const CONFIG_KEY = 'tampermonkeyuserConfig';
+    const defaultConfig = {
+        enableOverridePopup: true,//覆写弹窗功能(跳过弹窗)
+        enableBatchDelete: true,//批量删除发票功能
+
+    };
+    let tampermonkeyuserConfig = GM_getValue(CONFIG_KEY, defaultConfig);// 从存储加载配置或使用默认值
+    function saveConfig() { GM_setValue(CONFIG_KEY, tampermonkeyuserConfig); } // 保存配置到存储
+    let menuIds = {};// 保存菜单 ID
+    // 切换功能
+    function toggleFeature(featureKey) {
+        tampermonkeyuserConfig[featureKey] = !tampermonkeyuserConfig[featureKey];
+        // 保存最新配置
+        saveConfig();
+        // 输出当前完整配置对象到控制台
+        console.log("当前配置:", JSON.stringify(tampermonkeyuserConfig, null, 4));
+        // 更新菜单标题
+        updateMenus();
+    }
+    // 更新菜单项（先注销旧菜单再注册新菜单）
+    function updateMenus() {
+        for (const key in menuIds) {
+            if (menuIds[key] !== undefined) {
+                GM_unregisterMenuCommand(menuIds[key]);
+            }
+        }
+
+        menuIds.enableOverridePopup = GM_registerMenuCommand(
+            `${tampermonkeyuserConfig.enableOverridePopup ? '禁用 覆写弹窗功能(跳过弹窗)(当前已启用)' : '开启 覆写弹窗功能(跳过弹窗)(当前已禁用)'}`,
+            () => toggleFeature('enableOverridePopup')
+        );
+
+        menuIds.enableBatchDelete = GM_registerMenuCommand(
+            `${tampermonkeyuserConfig.enableBatchDelete ? '禁用 批量删除发票功能(当前已启用)' : '开启 批量删除发票功能(当前已禁用)'}`,
+            () => toggleFeature('enableBatchDelete')
+        );
+
+    }
+    updateMenus();// 初次注册菜单
+
+
+
+
+
+
 
     /** ==== 配置区 ==== **/
     const CONFIG = {
@@ -61,61 +111,12 @@
         error: (...args) => console.error('[AutoDelete]', ...args)
     };
 
+    /** ==== 构建 UI部分 ==== **/
     /**
-     * 全量刷新任务面板显示
-     * 使用全局 taskList 数据
-     */
-    function updateUiDisplay() {
-        // 检查面板是否存在
-        const panel = document.getElementById('AutoDeleteInvoice_taskPanel');
-        if (!panel) {
-            console.warn('[AutoDeleteInvoice] 任务面板不存在，无法刷新 UI');
-            return;
-        }
-
-        // 顶部统计元素
-        const totalTasksEl = document.getElementById('AutoDeleteInvoice_totalTasks');
-        const successTasksEl = document.getElementById('AutoDeleteInvoice_successTasks');
-        const pendingTasksEl = document.getElementById('AutoDeleteInvoice_pendingTasks');
-        const tbody = document.getElementById('AutoDeleteInvoice_taskTableBody');
-
-        if (!totalTasksEl || !successTasksEl || !pendingTasksEl || !tbody) {
-            console.warn('[AutoDeleteInvoice] 面板 DOM 不完整');
-            return;
-        }
-
-        // 统计数据
-        const totalCount = taskList.length;
-        const successCount = taskList.filter(t => t.status === 'success').length;
-        const pendingCount = taskList.filter(t => t.status === 'pending').length;
-
-        // 更新顶部统计数字
-        totalTasksEl.textContent = totalCount;
-        successTasksEl.textContent = successCount;
-        pendingTasksEl.textContent = pendingCount;
-
-        // **全量更新表格**
-        tbody.innerHTML = ''; // 清空现有内容
-        taskList.forEach(task => {
-            // 创建行并设置列内容
-            const row = document.createElement('tr');
-            row.innerHTML = `
-            <td class="AutoDeleteInvoice_invoiceNo">${task.invoiceNo || ''}</td>
-            <td class="AutoDeleteInvoice_invoiceDate">${task.invoiceDate || ''}</td>
-            <td class="AutoDeleteInvoice_totalAmount">${task.totalAmount != null ? task.totalAmount : ''}</td>
-            <td class="AutoDeleteInvoice_statusCol AutoDeleteInvoice_status${task.status.charAt(0).toUpperCase() + task.status.slice(1)}">
-                ${getStatusText(task.status)}
-            </td>
-        `;
-            tbody.appendChild(row);
-        });
-    }
-
-    /**
-     * 插入批量删除功能按钮（删除选中 / 停止任务 / 展开任务列表）
+     * 插入批量删除功能按钮（删除选中发票 / 停止任务 / 展开关闭任务列表）
      * @returns {void}
      */
-    function addAutoDeleteInvoiceButtons() {
+    function AutoDeleteInvoice_addButtons() {
         // 样式：固定宽度+保留占位
         GM_addStyle(`
             /* 公共按钮样式 */
@@ -193,11 +194,10 @@
         mealBtn.insertAdjacentHTML('afterend', btnHTML);
         Logger.log("[批量删除发票]相关功能按钮已添加");
     }
-
     /**
      * 为批量删除功能的三个按钮绑定事件
      */
-    function bindAutoDeleteButtonsEvents() {
+    function AutoDeleteInvoice_bindButtonsEvents() {
         // 删除选中按钮
         const deleteBtn = document.getElementById('AutoDeleteInvoice_btnDeleteSelected');
         if (deleteBtn) {
@@ -206,7 +206,7 @@
                 try {
                     Logger.log("开始批量删除选中发票流程...");
                     taskList = [];//清空全局任务列表
-                    await processDeleteTasks(); // 调用原脚本异步批量删除逻辑
+                    await AutoDeleteInvoice_processDeleteTasks(); // 调用原脚本异步批量删除逻辑
                     Logger.log('批量删除任务已完成');
                 } catch (err) {
                     Logger.error('批量删除过程中出错:', err);
@@ -229,15 +229,14 @@
             expandBtn.addEventListener('click', () => {
                 Logger.log("展开任务列表按钮点击 展开/折叠详情");
                 // TODO: 换成实际展开任务列表逻辑
-                toggleTaskPanel(); // 切换显示/隐藏面板
+                AutoDeleteInvoice_toggleTaskPanel(); // 切换显示/隐藏面板
             });
         }
     }
-
     /**
      * 创建任务列表面板（固定位置）
      */
-    function createTaskPanel() {
+    function AutoDeleteInvoice_createTaskPanel() {
         if (document.getElementById('AutoDeleteInvoice_taskPanel')) return;//如果已经存在面板，不创建
         if (!document.getElementById('ctl00_ContentPlaceHolder1_TR_WDPJ0')) return;//如果不存在目标表格，不创建
 
@@ -386,7 +385,7 @@
                         </tr>
                     </thead>
                     <tbody id="AutoDeleteInvoice_taskTableBody">
-                        <!-- 数据由 updateUiDisplay() 填充 -->
+                        <!-- 数据由 AutoDeleteInvoice_updateUiDisplay() 填充 -->
                     </tbody>
                 </table>
             </div>
@@ -402,34 +401,56 @@
             });
     }
 
+
+    /** ==== 更新 UI内容部分 ==== **/
     /**
-     * 显示/隐藏 AutoDeleteInvoice_taskPanel
-     * @param {boolean|null} forceShow - 如果 true 则强制显示，如果 false 则强制隐藏，null 则切换
+     * 全量刷新任务面板显示
+     * 使用全局 taskList 数据
      */
-    function toggleTaskPanel(forceShow = null) {
+    function AutoDeleteInvoice_updateUiDisplay() {
+        // 检查面板是否存在
         const panel = document.getElementById('AutoDeleteInvoice_taskPanel');
         if (!panel) {
-            Logger.warn('任务面板不存在，无法切换显示状态');
+            console.warn('[AutoDeleteInvoice] 任务面板不存在，无法刷新 UI');
             return;
         }
 
-        const isHidden = panel.style.display === 'none' || getComputedStyle(panel).display === 'none';
+        // 顶部统计元素
+        const totalTasksEl = document.getElementById('AutoDeleteInvoice_totalTasks');
+        const successTasksEl = document.getElementById('AutoDeleteInvoice_successTasks');
+        const pendingTasksEl = document.getElementById('AutoDeleteInvoice_pendingTasks');
+        const tbody = document.getElementById('AutoDeleteInvoice_taskTableBody');
 
-        // 逻辑判断
-        if (forceShow === true) {
-            panel.style.display = 'block';
-            updateUiDisplay(); // 刷新面板内容
-        } else if (forceShow === false) {
-            panel.style.display = 'none';
-        } else {
-            // Toggle 模式
-            if (isHidden) {
-                panel.style.display = 'block';
-                updateUiDisplay(); // 刷新面板内容
-            } else {
-                panel.style.display = 'none';
-            }
+        if (!totalTasksEl || !successTasksEl || !pendingTasksEl || !tbody) {
+            console.warn('[AutoDeleteInvoice] 面板 DOM 不完整');
+            return;
         }
+
+        // 统计数据
+        const totalCount = taskList.length;
+        const successCount = taskList.filter(t => t.status === 'success').length;
+        const pendingCount = taskList.filter(t => t.status === 'pending').length;
+
+        // 更新顶部统计数字
+        totalTasksEl.textContent = totalCount;
+        successTasksEl.textContent = successCount;
+        pendingTasksEl.textContent = pendingCount;
+
+        // **全量更新表格**
+        tbody.innerHTML = ''; // 清空现有内容
+        taskList.forEach(task => {
+            // 创建行并设置列内容
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td class="AutoDeleteInvoice_invoiceNo">${task.invoiceNo || ''}</td>
+            <td class="AutoDeleteInvoice_invoiceDate">${task.invoiceDate || ''}</td>
+            <td class="AutoDeleteInvoice_totalAmount">${task.totalAmount != null ? task.totalAmount : ''}</td>
+            <td class="AutoDeleteInvoice_statusCol AutoDeleteInvoice_status${task.status.charAt(0).toUpperCase() + task.status.slice(1)}">
+                ${getStatusText(task.status)}
+            </td>
+        `;
+            tbody.appendChild(row);
+        });
     }
 
     /**
@@ -437,7 +458,7 @@
      * @function
      * @param {InvoiceTask} task - 当前任务对象
      */
-    function updateCurrentTaskInfo(task) {
+    function AutoDeleteInvoice_updateCurrentTaskInfo(task) {
         // 找到面板当前任务信息元素
         const currentTaskEl = document.getElementById('AutoDeleteInvoice_currentTask');
         if (!currentTaskEl) {
@@ -468,7 +489,7 @@
      * @function
      * @param {boolean} [Running=isRunning] - 是否处于运行状态
      */
-    function toggleButtonState(running = isRunning) {
+    function AutoDeleteInvoice_toggleButtonState(running = isRunning) {
         //todo
         //显示/隐藏各个功能按钮
         const deleteBtn = document.getElementById('AutoDeleteInvoice_btnDeleteSelected');
@@ -484,6 +505,38 @@
         }
     }
 
+    /**
+     * 显示/隐藏 AutoDeleteInvoice_taskPanel
+     * @param {boolean|null} forceShow - 如果 true 则强制显示，如果 false 则强制隐藏，null 则切换
+     */
+    function AutoDeleteInvoice_toggleTaskPanel(forceShow = null) {
+        const panel = document.getElementById('AutoDeleteInvoice_taskPanel');
+        if (!panel) {
+            Logger.warn('任务面板不存在，无法切换显示状态');
+            return;
+        }
+
+        const isHidden = panel.style.display === 'none' || getComputedStyle(panel).display === 'none';
+
+        // 逻辑判断
+        if (forceShow === true) {
+            panel.style.display = 'block';
+            AutoDeleteInvoice_updateUiDisplay(); // 刷新面板内容
+        } else if (forceShow === false) {
+            panel.style.display = 'none';
+        } else {
+            // Toggle 模式
+            if (isHidden) {
+                panel.style.display = 'block';
+                AutoDeleteInvoice_updateUiDisplay(); // 刷新面板内容
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+    }
+
+
+    /** ==== 公共函数  ==== **/
     /**
      * 根据状态码返回状态文本
      * @function
@@ -566,13 +619,111 @@
     }
 
     /**
+     * 查找两个任务列表中共同存在的发票
+     * @function
+     * @param {InvoiceTask[]} list1 - 第一个任务列表
+     * @param {InvoiceTask[]} list2 - 第二个任务列表
+     * @returns {InvoiceTask[]} 在两个列表中都存在的任务（返回list的每行对象引用自list1）
+     */
+    const findSharedInvoices = (list1, list2) => {
+        // 创建一个 Set 用于存储 list2 中的所有发票号
+        const invoiceNosInList2 = new Set();
+
+        list2.forEach(task => { // 遍历 list2 中的每个任务
+            invoiceNosInList2.add(task.invoiceNo);// 将每个任务的发票号添加到 Set 中
+        });
+
+        const resultList = [];// 创建一个空数组用于存储匹配的任务
+
+        // 遍历 list1 中的每个任务
+        list1.forEach(task => {
+            // 检查当前任务的发票号是否存在于 list2 的发票号集合中
+            if (invoiceNosInList2.has(task.invoiceNo)) {
+                // 如果存在，直接将 list1 中的任务添加到结果数组中
+                resultList.push(task);
+            }
+        });
+        return resultList;// 返回包含匹配任务的新列表
+    }
+
+
+    /** ==== 劫持alert和confirm弹窗 功能业务函数  ==== **/
+    /**
+     * 覆写窗口对象的 alert 和 confirm
+     * @function
+     * @param {Window} win - 目标窗口对象
+     * @param {string} frameName - 窗口名称（用于日志）
+     */
+    function hookWindow(win, frameName) {
+        try {
+            if (win._alertHooked) return;
+
+            const originalAlert = win.alert;
+            win.alert = function (message) {
+                Logger.log("Alert frame URL:", win.location.href, ", name:", frameName, ", message:", message);
+                // debugger;
+
+                //只替换指定消息的弹窗
+                if (message === "删除成功！" ||
+                    win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
+                    Logger.log("我的票夹页面[删除发票]动作收到回调-删除成功");
+                } else {
+                    //其余消息放行
+                    originalAlert(message);
+                }
+            };
+
+            const originalConfirm = win.confirm;
+            win.confirm = function (message) {
+                Logger.log("Confirm frame URL:", win.location.href, ", name:", frameName, ", message:", message);
+                // debugger;
+
+                //只替换指定消息的弹窗
+                if (message === "注1意：删除后如果再需要用这张票的话，需要重新上传查验，您确定要删除吗？" ||
+                    win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
+                    Logger.log("我的票夹页面 自动确认删除发票对话框");
+                    return true;
+                } else {
+                    //其余消息放行
+                    return originalConfirm(message);
+                }
+                //return true;
+            };
+
+            // const originalPrompt = win.prompt;
+            // win.prompt = function (message, defaultValue) {
+            //     Logger.log("Prompt frame URL:",win.location.href);
+            //     Logger.log("Prompt in frame:", frameName, ", message:", message);
+            //     // debugger;
+            //     return defaultValue;
+            // };
+
+            win._alertHooked = true;
+        } catch (e) {
+            Logger.warn("Cannot hook frame:", frameName, e);
+        }
+    }
+    /**
+     * 覆写所有 frame 的 alert 和 confirm
+     * @function
+     */
+    function hookAllFrames() {
+        hookWindow(window, 'top');
+        for (let i = 0; i < window.frames.length; i++) {
+            hookWindow(window.frames[i], `frame-${i}`);
+        }
+    }
+
+
+    /** ==== 批量删除选中发票 功能业务函数  ==== **/
+    /**
      * 从发票表格中提取任务列表
      * @function
      * @returns {InvoiceTask[]} 发票任务列表
      * @changelog
      * 将ctl00_ContentPlaceHolder1_TR_WDPJ0表格转化为list obj
      */
-    function extractTableInformation() {
+    function AutoDeleteInvoice_extractTableInformation() {
         // 获取表格
         const table = document.getElementById('ctl00_ContentPlaceHolder1_TR_WDPJ0');
         if (!table) {
@@ -641,14 +792,14 @@
      * @function
      * @returns {InvoiceTask[]} 已勾选的任务列表
      */
-    function createTaskList() {
+    function AutoDeleteInvoice_createTaskList() {
         const tasks = [];
-        extractTableInformation().forEach(row => {
+        AutoDeleteInvoice_extractTableInformation().forEach(row => {
             if (row.isChecked) {
                 tasks.push(row);
             }
         })
-        // Logger.log("勾选的发票createTaskList", tasks);
+        // Logger.log("勾选的发票AutoDeleteInvoice_createTaskList", tasks);
         return tasks;
     }
 
@@ -659,7 +810,7 @@
      * @param {InvoiceTask} listrow - 发票任务对象
      * @returns {Promise<{success:boolean, reason?:string, error?:Error}>} 点击结果
      */
-    async function safeClickDeleteButton(listrow) {
+    async function AutoDeleteInvoice_safeClickDeleteButton(listrow) {
         try {
             // 根据 buttonId 获取按钮 Element
             const deleteButton = document.getElementById(listrow.deleteButtonId);
@@ -705,7 +856,7 @@
      * @changelog
      * 增加基于发票号是否存在 判断是否成功
      */
-    function waitForDeleteButtonStateChange(tablerow, timeout = CONFIG.MAX_WAIT_TIME) {
+    function AutoDeleteInvoice_waitForDeleteButtonStateChange(tablerow, timeout = CONFIG.MAX_WAIT_TIME) {
         return new Promise((resolve) => {
             const startTime = Date.now();
             const buttonId = tablerow.deleteButtonId;
@@ -713,7 +864,7 @@
 
             function checkState() {
                 const button = document.getElementById(buttonId);
-                const nowlist = extractTableInformation();
+                const nowlist = AutoDeleteInvoice_extractTableInformation();
                 const notHasInvo = nowlist.some(obj => obj.invoiceNo === invoiceNo) ? 0 : 1;//判断taskList中有无当前行的发票，以发票号为关键词。没有输出1，有输出0
 
                 if (notHasInvo) {
@@ -750,110 +901,16 @@
     }
 
     /**
-     * 查找两个任务列表中共同存在的发票
-     * @function
-     * @param {InvoiceTask[]} list1 - 第一个任务列表
-     * @param {InvoiceTask[]} list2 - 第二个任务列表
-     * @returns {InvoiceTask[]} 在两个列表中都存在的任务（返回list的每行对象引用自list1）
-     */
-    const findSharedInvoices = (list1, list2) => {
-        // 创建一个 Set 用于存储 list2 中的所有发票号
-        const invoiceNosInList2 = new Set();
-
-        list2.forEach(task => { // 遍历 list2 中的每个任务
-            invoiceNosInList2.add(task.invoiceNo);// 将每个任务的发票号添加到 Set 中
-        });
-
-        const resultList = [];// 创建一个空数组用于存储匹配的任务
-
-        // 遍历 list1 中的每个任务
-        list1.forEach(task => {
-            // 检查当前任务的发票号是否存在于 list2 的发票号集合中
-            if (invoiceNosInList2.has(task.invoiceNo)) {
-                // 如果存在，直接将 list1 中的任务添加到结果数组中
-                resultList.push(task);
-            }
-        });
-        return resultList;// 返回包含匹配任务的新列表
-    }
-
-    /**
-     * 覆写窗口对象的 alert 和 confirm
-     * @function
-     * @param {Window} win - 目标窗口对象
-     * @param {string} frameName - 窗口名称（用于日志）
-     */
-    function hookWindow(win, frameName) {
-        try {
-            if (win._alertHooked) return;
-
-            const originalAlert = win.alert;
-            win.alert = function (message) {
-                Logger.log("Alert frame URL:", win.location.href, ", name:", frameName, ", message:", message);
-                // debugger;
-
-                //只替换指定消息的弹窗
-                if (message === "删除成功！" ||
-                    win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
-                    Logger.log("我的票夹页面[删除发票]动作收到回调-删除成功");
-                } else {
-                    //其余消息放行
-                    originalAlert(message);
-                }
-            };
-
-            const originalConfirm = win.confirm;
-            win.confirm = function (message) {
-                Logger.log("Confirm frame URL:", win.location.href, ", name:", frameName, ", message:", message);
-                // debugger;
-
-                //只替换指定消息的弹窗
-                if (message === "注1意：删除后如果再需要用这张票的话，需要重新上传查验，您确定要删除吗？" ||
-                    win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
-                    Logger.log("我的票夹页面 自动确认删除发票对话框");
-                    return true;
-                } else {
-                    //其余消息放行
-                    return originalConfirm(message);
-                }
-                //return true;
-            };
-
-            // const originalPrompt = win.prompt;
-            // win.prompt = function (message, defaultValue) {
-            //     Logger.log("Prompt frame URL:",win.location.href);
-            //     Logger.log("Prompt in frame:", frameName, ", message:", message);
-            //     // debugger;
-            //     return defaultValue;
-            // };
-
-            win._alertHooked = true;
-        } catch (e) {
-            Logger.warn("Cannot hook frame:", frameName, e);
-        }
-    }
-    /**
-     * 覆写所有 frame 的 alert 和 confirm
-     * @function
-     */
-    function hookAllFrames() {
-        hookWindow(window, 'top');
-        for (let i = 0; i < window.frames.length; i++) {
-            hookWindow(window.frames[i], `frame-${i}`);
-        }
-    }
-
-    /**
      * 串行删除勾选的发票 主要工作逻辑函数
      * @async
      * @function
      * @returns {Promise<void>}
      */
-    async function processDeleteTasks() {
+    async function AutoDeleteInvoice_processDeleteTasks() {
         isRunning = true;
-        toggleButtonState(isRunning);//更新按钮状态
-        taskList = createTaskList(); //获取最新状态，并写入全局taskList列表中
-        updateUiDisplay();//更新UI-任务列表
+        AutoDeleteInvoice_toggleButtonState(isRunning);//更新按钮状态
+        taskList = AutoDeleteInvoice_createTaskList(); //获取最新状态，并写入全局taskList列表中
+        AutoDeleteInvoice_updateUiDisplay();//更新UI-任务列表
         Logger.log("勾选的发票", taskList);
         Logger.log("串行处理删除选中发票流程 开始...");
 
@@ -864,7 +921,7 @@
                 break;
             }
 
-            const nowList = extractTableInformation();//获取最新表格状态
+            const nowList = AutoDeleteInvoice_extractTableInformation();//获取最新表格状态
 
             const workList = findSharedInvoices(nowList, taskList);//基于nowList内容，找到nowList与taskList都有的发票号
 
@@ -886,8 +943,8 @@
             const task = taskList.find(t => t.invoiceNo === invoiceNo);//task为当前任务
             if (task) {
                 task.status = 'processing';
-                updateUiDisplay();
-                updateCurrentTaskInfo(task);
+                AutoDeleteInvoice_updateUiDisplay();
+                AutoDeleteInvoice_updateCurrentTaskInfo(task);
             }
 
             // 检查是否停止
@@ -903,7 +960,7 @@
                 if (!isRunning) break;
 
                 // 安全点击按钮
-                const clickResult = await safeClickDeleteButton(firstDelInvoice);
+                const clickResult = await AutoDeleteInvoice_safeClickDeleteButton(firstDelInvoice);
                 if (!clickResult.success) { //删除按钮点击不成功处理
                     Logger.warn(`发票编号: ${invoiceNo} 删除按钮点击失败: ${clickResult.reason}`);
 
@@ -921,7 +978,7 @@
                             default:
                                 break;
                         }
-                        updateUiDisplay();
+                        AutoDeleteInvoice_updateUiDisplay();
                     }
 
                     // 如果按钮不存在、不可用，继续处理下一个
@@ -929,7 +986,7 @@
                 }
 
                 // 等待按钮状态变化
-                const buttonResult = await waitForDeleteButtonStateChange(firstDelInvoice);
+                const buttonResult = await AutoDeleteInvoice_waitForDeleteButtonStateChange(firstDelInvoice);
                 Logger.log(`发票编号:${invoiceNo}删除按钮 处理结果:`, buttonResult);
                 // 更新任务状态
                 if (task) {
@@ -938,7 +995,7 @@
                     } else {
                         task.status = 'failed';
                     }
-                    updateUiDisplay();
+                    AutoDeleteInvoice_updateUiDisplay();
                 }
 
                 // 检查是否停止
@@ -950,7 +1007,7 @@
                 // 更新任务状态
                 if (task) {
                     task.status = 'failed';
-                    updateUiDisplay();
+                    AutoDeleteInvoice_updateUiDisplay();
                 }
 
                 // // 等待期间检查是否停止
@@ -962,10 +1019,13 @@
             }
         }
         isRunning = false;
-        toggleButtonState(isRunning);//更新按钮状态
+        AutoDeleteInvoice_toggleButtonState(isRunning);//更新按钮状态
         Logger.log("串行处理删除选中发票流程 结束...");
     }
 
+
+
+    /** ==== 脚本初始化函数  ==== **/
     /**
      * 初始化脚本
      * @function
@@ -975,24 +1035,32 @@
         try {
             const currentUrl = window.location.href;
             Logger.log("currentUrl", currentUrl)
+            console.log("当前配置:", JSON.stringify(tampermonkeyuserConfig, null, 4));
 
-            //判断是否存在 我的票夹 页面的指定表格
-            if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
-                //修改原有页面样式的函数
-                addAutoDeleteInvoiceButtons();//添加删除选中功能按钮
-                createTaskPanel();//添加任务列表（默认隐藏）
+            //判断是否使能 批量删除发票功能
+            if (tampermonkeyuserConfig.enableBatchDelete) {
+                //判断是否存在 我的票夹 页面的指定表格
+                if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
+                    //修改原有页面样式的函数
+                    AutoDeleteInvoice_addButtons();//添加删除选中功能按钮
+                    AutoDeleteInvoice_createTaskPanel();//添加任务列表（默认隐藏）
 
-                //为批量删除功能的三个按钮绑定事件
-                bindAutoDeleteButtonsEvents();
+                    //为批量删除功能的三个按钮绑定事件
+                    AutoDeleteInvoice_bindButtonsEvents();
+
+                    Logger.log("批量删除发票 已初始化完成");
+                }
             }
 
-            //用来覆写原始弹窗函数
-            hookAllFrames();
-            // 持续检测新 iframe
-            setInterval(() => {
+            //判断是否使能 覆写弹窗功能(跳过弹窗)
+            if (tampermonkeyuserConfig.enableOverridePopup) {
+                //用来覆写原始弹窗函数
                 hookAllFrames();
-            }, 1000);
-
+                // 持续检测新 iframe
+                setInterval(() => {
+                    hookAllFrames();
+                }, 1000);
+            }
 
             // 监听ASP.NET异步回发完成事件
             if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
@@ -1001,20 +1069,22 @@
                     //ASP.NET异步后要重新再插入一次
                     //修改原有页面样式的函数
 
-                    //判断是否存在 我的票夹 页面的指定表格
-                    if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
-                        //修改原有页面样式的函数
-                        addAutoDeleteInvoiceButtons();//添加删除选中功能按钮
+                    //判断是否使能 批量删除发票功能
+                    if (tampermonkeyuserConfig.enableBatchDelete) {
+                        //判断是否存在 我的票夹 页面的指定表格
+                        if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
+                            //修改原有页面样式的函数
+                            AutoDeleteInvoice_addButtons();//添加删除选中功能按钮
 
-                        //为批量删除功能的三个按钮绑定事件
-                        bindAutoDeleteButtonsEvents();
+                            //为批量删除功能的三个按钮绑定事件
+                            AutoDeleteInvoice_bindButtonsEvents();
+                        }
                     }
-
                     Logger.log("ASP.NET异步回发完成");
                 });
             }
 
-            Logger.log("批量删除发票 已初始化完成");
+            Logger.log("initialize 已初始化完成");
         } catch (error) {
             Logger.error("初始化失败:", error);
         }
