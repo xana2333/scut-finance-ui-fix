@@ -61,63 +61,6 @@
         error: (...args) => console.error('[AutoDelete]', ...args)
     };
 
-    // 添加悬浮按钮的样式
-    GM_addStyle(`
-        #myFloatingBtn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #ff5722;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            z-index: 999999;
-        }
-        #myFloatingBtn:hover {
-            background-color: #e64a19;
-        }
-    `);
-    // 创建悬浮按钮
-    function createFloatingButton() {
-        const btn = document.createElement('button');
-        btn.id = 'myFloatingBtn';
-        btn.textContent = 'Test';
-        btn.title = '点击测试函数';
-
-        btn.addEventListener('click', () => {
-            const currentUrl = window.location.href;
-            Logger.log("currentUrl", currentUrl);
-            // 这里也可以调用你已有的函数，如 setupAutoAlert();
-            // setupAutoAlert();
-
-
-            // const list = createTaskList();
-            // Logger.log("work list", list);
-
-            // debugger;
-
-            processDeleteTasks();
-
-            // //获取发票列表
-            // const list = extractTableInformation();
-            // Logger.log("list", list);
-            // if (list && list.length > 0) {
-            //     const result = safeClickDeleteButton(list[0]);
-            //     Logger.log("return", result.success, result.reason, result.error);
-            //     // alert("line181");
-            //     // confirm("line191");
-            // }
-
-        });
-
-        document.body.appendChild(btn);
-    }
-
     /**
      * 全量刷新任务面板显示
      * 使用全局 taskList 数据
@@ -167,7 +110,6 @@
             tbody.appendChild(row);
         });
     }
-
 
     /**
      * 插入批量删除功能按钮（删除选中 / 停止任务 / 展开任务列表）
@@ -496,13 +438,6 @@
      * @param {InvoiceTask} task - 当前任务对象
      */
     function updateCurrentTaskInfo(task) {
-        // const taskInfoElement = document.getElementById('current-task-info');//current-task-info ID待修改
-        // if (taskInfoElement) {
-        //     taskInfoElement.textContent = `当前删除任务: ${task.invoiceNo} (${task.invoiceDate})`;
-        // }
-        //todo
-        //UI中应该有个地方显示当前任务信息
-
         // 找到面板当前任务信息元素
         const currentTaskEl = document.getElementById('AutoDeleteInvoice_currentTask');
         if (!currentTaskEl) {
@@ -527,7 +462,6 @@
             ${task.totalAmount != null ? task.totalAmount : ''} 元            
         `;
     }
-
 
     /**
      * 切换按钮状态
@@ -566,7 +500,6 @@
             default: return status;
         }
     }
-
 
     /**
      * 检查页面是否忙碌（异步回发或未完全加载）
@@ -631,7 +564,6 @@
         }
         return table;
     }
-
 
     /**
      * 从发票表格中提取任务列表
@@ -1034,7 +966,6 @@
         Logger.log("串行处理删除选中发票流程 结束...");
     }
 
-
     /**
      * 初始化脚本
      * @function
@@ -1045,9 +976,6 @@
             const currentUrl = window.location.href;
             Logger.log("currentUrl", currentUrl)
 
-            //添加临时测试的按钮
-            createFloatingButton();
-
             //判断是否存在 我的票夹 页面的指定表格
             if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
                 //修改原有页面样式的函数
@@ -1057,8 +985,6 @@
                 //为批量删除功能的三个按钮绑定事件
                 bindAutoDeleteButtonsEvents();
             }
-
-
 
             //用来覆写原始弹窗函数
             hookAllFrames();
@@ -1072,10 +998,9 @@
             if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
                 const prm = Sys.WebForms.PageRequestManager.getInstance();
                 prm.add_endRequest(function (sender, args) {
-
                     //ASP.NET异步后要重新再插入一次
                     //修改原有页面样式的函数
-                    //todo
+
                     //判断是否存在 我的票夹 页面的指定表格
                     if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
                         //修改原有页面样式的函数
