@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账-批量删除发票
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      2.0
 // @description  在我的发票页面，增加批量删除发票功能
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/*
@@ -118,15 +118,59 @@
         document.body.appendChild(btn);
     }
 
-    // 更新UI-任务列表
+    /**
+     * 全量刷新任务面板显示
+     * 使用全局 taskList 数据
+     */
     function updateUiDisplay() {
-        //todo
-        //更新任务列表Ui
+        // 检查面板是否存在
+        const panel = document.getElementById('AutoDeleteInvoice_taskPanel');
+        if (!panel) {
+            console.warn('[AutoDeleteInvoice] 任务面板不存在，无法刷新 UI');
+            return;
+        }
+
+        // 顶部统计元素
+        const totalTasksEl = document.getElementById('AutoDeleteInvoice_totalTasks');
+        const successTasksEl = document.getElementById('AutoDeleteInvoice_successTasks');
+        const pendingTasksEl = document.getElementById('AutoDeleteInvoice_pendingTasks');
+        const tbody = document.getElementById('AutoDeleteInvoice_taskTableBody');
+
+        if (!totalTasksEl || !successTasksEl || !pendingTasksEl || !tbody) {
+            console.warn('[AutoDeleteInvoice] 面板 DOM 不完整');
+            return;
+        }
+
+        // 统计数据
+        const totalCount = taskList.length;
+        const successCount = taskList.filter(t => t.status === 'success').length;
+        const pendingCount = taskList.filter(t => t.status === 'pending').length;
+
+        // 更新顶部统计数字
+        totalTasksEl.textContent = totalCount;
+        successTasksEl.textContent = successCount;
+        pendingTasksEl.textContent = pendingCount;
+
+        // **全量更新表格**
+        tbody.innerHTML = ''; // 清空现有内容
+        taskList.forEach(task => {
+            // 创建行并设置列内容
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td class="AutoDeleteInvoice_invoiceNo">${task.invoiceNo || ''}</td>
+            <td class="AutoDeleteInvoice_invoiceDate">${task.invoiceDate || ''}</td>
+            <td class="AutoDeleteInvoice_totalAmount">${task.totalAmount != null ? task.totalAmount : ''}</td>
+            <td class="AutoDeleteInvoice_statusCol AutoDeleteInvoice_status${task.status.charAt(0).toUpperCase() + task.status.slice(1)}">
+                ${getStatusText(task.status)}
+            </td>
+        `;
+            tbody.appendChild(row);
+        });
     }
 
 
     /**
-     * 插入额外按钮（删除选中 / 停止任务 / 展开任务列表）
+     * 插入批量删除功能按钮（删除选中 / 停止任务 / 展开任务列表）
      * @returns {void}
      */
     function addAutoDeleteInvoiceButtons() {
@@ -171,7 +215,7 @@
             /* 展开任务列表按钮 */
             .autoDeleteBtn-expand-tasklist {
                 background-color: #2196F3; /* 蓝色 */
-                width: 140px;
+                width: 170px;
             }
         `);
 
@@ -196,7 +240,7 @@
                     style="visibility:hidden;"
                     >
                 <input type="button" id="AutoDeleteInvoice_btnExpandTaskList"
-                    value="展开任务列表"
+                    value="展开关闭任务列表"
                     class="autoDeleteBtn autoDeleteBtn-expand-tasklist"
                     style="visibility:visible;"
                     >
@@ -251,190 +295,9 @@
     /**
      * 创建任务列表面板（固定位置）
      */
-    // function createTaskPanel() {
-    //     // 如果已经存在面板，就不重复创建
-    //     if (document.getElementById('AutoDeleteInvoice_taskPanel')) {
-    //         Logger.warn('[AutoDeleteInvoice] 任务面板已存在');
-    //         return;
-    //     }
-
-    //     // 注入 CSS
-    //     GM_addStyle(`
-    //         .AutoDeleteInvoice_panel {
-    //             position: fixed;
-    //             top: 50px;
-    //             left: 50%;
-    //             transform: translateX(-50%);
-    //             z-index: 99999;
-    //             background-color: rgba(255, 255, 255, 0.95);
-    //             border: 1px solid #ccc;
-    //             border-radius: 8px;
-    //             padding: 15px;
-    //             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    //             width: 700px;
-    //             font-family: 'Microsoft YaHei', sans-serif;
-    //         }
-    //         .AutoDeleteInvoice_statusBar {
-    //             display: flex;
-    //             justify-content: space-around;
-    //             margin-bottom: 10px;
-    //         }
-    //         .AutoDeleteInvoice_statusItem {
-    //             text-align: center;
-    //         }
-    //         .AutoDeleteInvoice_statusLabel {
-    //             font-size: 12px;
-    //             color: #666;
-    //             margin-bottom: 4px;
-    //             display: block;
-    //         }
-    //         .AutoDeleteInvoice_statusValue {
-    //             font-size: 16px;
-    //             font-weight: bold;
-    //         }
-
-    //         /* 当前任务 */
-    //         #AutoDeleteInvoice_currentTask {
-    //             padding: 8px;
-    //             margin-bottom: 10px;
-    //             background: #f9f9f9;
-    //             border-radius: 4px;
-    //             font-size: 14px;
-    //             color: #333;
-    //         }
-
-    //         /* 表格样式 */
-    //         .AutoDeleteInvoice_taskTable {
-    //             width: 100%;
-    //             border-collapse: collapse;
-    //         }
-    //         .AutoDeleteInvoice_taskTable th, .AutoDeleteInvoice_taskTable td {
-    //             border: 1px solid #ddd;
-    //             padding: 6px 10px;
-    //             font-size: 13px;
-    //             text-align: center;
-    //         }
-    //         .AutoDeleteInvoice_taskTable th {
-    //             background-color: #f1f1f1;
-    //             font-weight: bold;
-    //         }
-
-    //         /* 状态颜色 */
-    //         .AutoDeleteInvoice_statusPending {
-    //             background-color: #e0e0e0;
-    //             color: #333;
-    //         }
-    //         .AutoDeleteInvoice_statusProcessing {
-    //             background-color: #2196F3;
-    //             color: white;
-    //         }
-    //         .AutoDeleteInvoice_statusSuccess {
-    //             background-color: #4CAF50;
-    //             color: white;
-    //         }
-    //         .AutoDeleteInvoice_statusFailed {
-    //             background-color: #f44336;
-    //             color: white;
-    //         }
-    //         .AutoDeleteInvoice_statusSkipped {
-    //             background-color: #FF9800;
-    //             color: white;
-    //         }
-
-    //         /* 关闭按钮 */
-    //         #AutoDeleteInvoice_closeBtn {
-    //             background-color: #f44336;
-    //             color: white;
-    //             border: none;
-    //             border-radius: 4px;
-    //             padding: 5px 10px;
-    //             cursor: pointer;
-    //             font-size: 12px;
-    //             float: right;
-    //         }
-    //         #AutoDeleteInvoice_closeBtn:hover {
-    //             opacity: 0.9;
-    //         }
-    //     `);
-
-    //     // 创建面板容器
-    //     const panel = document.createElement('div');
-    //     panel.id = 'AutoDeleteInvoice_taskPanel';
-    //     panel.className = 'AutoDeleteInvoice_panel';
-
-    //     // 标题栏 + 关闭按钮
-    //     const titleBar = document.createElement('div');
-    //     titleBar.style.display = 'flex';
-    //     titleBar.style.justifyContent = 'space-between';
-    //     titleBar.style.alignItems = 'center';
-    //     titleBar.style.marginBottom = '10px';
-
-    //     const title = document.createElement('div');
-    //     title.textContent = '批量删除选中发票 - 任务状态';
-    //     title.style.fontSize = '16px';
-    //     title.style.fontWeight = 'bold';
-
-    //     const closeBtn = document.createElement('button');
-    //     closeBtn.id = 'AutoDeleteInvoice_closeBtn';
-    //     closeBtn.textContent = '关闭面板';
-    //     closeBtn.addEventListener('click', () => {
-    //         panel.style.display = 'none';
-    //     });
-
-    //     titleBar.appendChild(title);
-    //     titleBar.appendChild(closeBtn);
-    //     panel.appendChild(titleBar);
-
-    //     // 状态栏
-    //     const statusBar = document.createElement('div');
-    //     statusBar.id = 'AutoDeleteInvoice_statusBar';
-    //     statusBar.className = 'AutoDeleteInvoice_statusBar';
-    //     statusBar.innerHTML = `
-    //         <div class="AutoDeleteInvoice_statusItem">
-    //             <span class="AutoDeleteInvoice_statusLabel">总任务数</span>
-    //             <span class="AutoDeleteInvoice_statusValue" id="AutoDeleteInvoice_totalTasks">0</span>
-    //         </div>
-    //         <div class="AutoDeleteInvoice_statusItem">
-    //             <span class="AutoDeleteInvoice_statusLabel">成功数</span>
-    //             <span class="AutoDeleteInvoice_statusValue" id="AutoDeleteInvoice_successTasks">0</span>
-    //         </div>
-    //         <div class="AutoDeleteInvoice_statusItem">
-    //             <span class="AutoDeleteInvoice_statusLabel">待执行数</span>
-    //             <span class="AutoDeleteInvoice_statusValue" id="AutoDeleteInvoice_pendingTasks">0</span>
-    //         </div>
-    //     `;
-    //     panel.appendChild(statusBar);
-
-    //     // 当前任务信息
-    //     const currentTaskDiv = document.createElement('div');
-    //     currentTaskDiv.id = 'AutoDeleteInvoice_currentTask';
-    //     currentTaskDiv.textContent = '当前任务信息：无';
-    //     panel.appendChild(currentTaskDiv);
-
-    //     // 任务表格
-    //     const table = document.createElement('table');
-    //     table.id = 'AutoDeleteInvoice_taskTable';
-    //     table.className = 'AutoDeleteInvoice_taskTable';
-    //     table.innerHTML = `
-    //     <thead>
-    //         <tr>
-    //             <th>发票号</th>
-    //             <th>开票日期</th>
-    //             <th>合计金额</th>
-    //             <th>状态</th>
-    //         </tr>
-    //     </thead>
-    //     <tbody id="AutoDeleteInvoice_taskTableBody">
-    //         <!-- 数据由 updateUiDisplay() 填充 -->
-    //     </tbody>
-    // `;
-    //     panel.appendChild(table);
-
-    //     // 插入到 body
-    //     document.body.appendChild(panel);
-    // }
     function createTaskPanel() {
-        if (document.getElementById('AutoDeleteInvoice_taskPanel')) return;
+        if (document.getElementById('AutoDeleteInvoice_taskPanel')) return;//如果已经存在面板，不创建
+        if (!document.getElementById('ctl00_ContentPlaceHolder1_TR_WDPJ0')) return;//如果不存在目标表格，不创建
 
         GM_addStyle(`
             .AutoDeleteInvoice_panel {
@@ -448,7 +311,7 @@
                 border-radius: 8px;
                 padding: 8px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                width: 700px;
+                max-width: 700px;
                 font-family: 'Microsoft YaHei', sans-serif;
             }
             .AutoDeleteInvoice_headerRow {
@@ -472,7 +335,7 @@
             }
             .AutoDeleteInvoice_statusValue.green { color: green; }
             .AutoDeleteInvoice_statusValue.orange { color: orange; }
-            
+
             /* 关闭按钮 */
             #AutoDeleteInvoice_closeBtn {
                 background-color: #f44336;
@@ -488,24 +351,65 @@
                 opacity: 0.9;
             }
 
+            /* 任务列表 表格样式 */
             .AutoDeleteInvoice_taskTable {
-                width: 100%;
+                min-width: 430px;
                 border-collapse: collapse;
+                table-layout: fixed; /* 固定列宽 */
             }
-            .AutoDeleteInvoice_taskTable th, .AutoDeleteInvoice_taskTable td {
+            .AutoDeleteInvoice_taskTable th, 
+            .AutoDeleteInvoice_taskTable td {
                 border: 1px solid #ddd;
-                padding: 6px 10px;
-                font-size: 13px;
+                padding: 2px 10px;
+                font-size: 14px;
                 text-align: center;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
-            .AutoDeleteInvoice_taskTable th {
-                background-color: #f1f1f1;
-                font-weight: bold;
+            .AutoDeleteInvoice_taskTable th.AutoDeleteInvoice_invoiceNo,
+            .AutoDeleteInvoice_taskTable td.AutoDeleteInvoice_invoiceNo {
+                width: 130px;
             }
+            .AutoDeleteInvoice_taskTable th.AutoDeleteInvoice_invoiceDate,
+            .AutoDeleteInvoice_taskTable td.AutoDeleteInvoice_invoiceDate {
+                width: 50px;
+            }
+            .AutoDeleteInvoice_taskTable th.AutoDeleteInvoice_totalAmount,
+            .AutoDeleteInvoice_taskTable td.AutoDeleteInvoice_totalAmount {
+                width: 50px;
+            }
+            .AutoDeleteInvoice_taskTable th.AutoDeleteInvoice_statusCol,
+            .AutoDeleteInvoice_taskTable td.AutoDeleteInvoice_statusCol {
+                width: 45px;
+            }
+            
+            /* 状态颜色类 */
+            .AutoDeleteInvoice_statusPending {
+                background-color: #e0e0e0;
+                color: #333;
+            }
+            .AutoDeleteInvoice_statusProcessing {
+                background-color: #2196F3;
+                color: #fff;
+            }
+            .AutoDeleteInvoice_statusSuccess {
+                background-color: #4CAF50;
+                color: #fff;
+            }
+            .AutoDeleteInvoice_statusFailed {
+                background-color: #f44336;
+                color: #fff;
+            }
+            .AutoDeleteInvoice_statusSkipped {
+                background-color: #FF9800;
+                color: #fff;
+            }
+
         `);
 
         const panelHTML = `
-            <div id="AutoDeleteInvoice_taskPanel" class="AutoDeleteInvoice_panel" style="display:;">
+            <div id="AutoDeleteInvoice_taskPanel" class="AutoDeleteInvoice_panel" style="display:none;">
                 <div class="AutoDeleteInvoice_headerRow">
                     <!-- 左端标题 -->
                     <div style="font-size:16px;font-weight:bold;">批量删除选中发票</div>
@@ -533,10 +437,10 @@
                 <table id="AutoDeleteInvoice_taskTable" class="AutoDeleteInvoice_taskTable">
                     <thead>
                         <tr>
-                            <th>发票号</th>
-                            <th>开票日期</th>
-                            <th>合计金额</th>
-                            <th>状态</th>
+                            <th class="AutoDeleteInvoice_invoiceNo">发票号</th> 
+                            <th class="AutoDeleteInvoice_invoiceDate">开票日期</th>
+                            <th class="AutoDeleteInvoice_totalAmount">合计金额</th>
+                            <th class="AutoDeleteInvoice_statusCol">状态</th>
                         </tr>
                     </thead>
                     <tbody id="AutoDeleteInvoice_taskTableBody">
@@ -555,7 +459,6 @@
                 document.getElementById('AutoDeleteInvoice_taskPanel').style.display = 'none';
             });
     }
-
 
     /**
      * 显示/隐藏 AutoDeleteInvoice_taskPanel
@@ -587,13 +490,6 @@
         }
     }
 
-
-
-
-
-
-
-
     /**
      * 更新 UI 中当前任务信息
      * @function
@@ -606,6 +502,30 @@
         // }
         //todo
         //UI中应该有个地方显示当前任务信息
+
+        // 找到面板当前任务信息元素
+        const currentTaskEl = document.getElementById('AutoDeleteInvoice_currentTask');
+        if (!currentTaskEl) {
+            console.warn('[AutoDeleteInvoice] 当前任务信息元素不存在');
+            return;
+        }
+
+        if (!task) {
+            currentTaskEl.textContent = '当前任务信息：无';
+            return;
+        }
+
+        // 构造状态文字与颜色类
+        const statusText = getStatusText(task.status);
+        const statusClass = `AutoDeleteInvoice_status${task.status.charAt(0).toUpperCase() + task.status.slice(1)}`;
+
+        // 更新显示内容（HTML更灵活，可以分列显示）
+        currentTaskEl.innerHTML = `
+            当前任务：
+            ${task.invoiceNo || ''}
+            (${task.invoiceDate || ''})
+            ${task.totalAmount != null ? task.totalAmount : ''} 元            
+        `;
     }
 
 
@@ -1126,16 +1046,19 @@
             Logger.log("currentUrl", currentUrl)
 
             //添加临时测试的按钮
-            // createFloatingButton();
+            createFloatingButton();
+
+            //判断是否存在 我的票夹 页面的指定表格
+            if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
+                //修改原有页面样式的函数
+                addAutoDeleteInvoiceButtons();//添加删除选中功能按钮
+                createTaskPanel();//添加任务列表（默认隐藏）
+
+                //为批量删除功能的三个按钮绑定事件
+                bindAutoDeleteButtonsEvents();
+            }
 
 
-            //修改原有页面样式的函数
-            addAutoDeleteInvoiceButtons();
-            createTaskPanel();
-
-
-            //为批量删除功能的三个按钮绑定事件
-            bindAutoDeleteButtonsEvents();
 
             //用来覆写原始弹窗函数
             hookAllFrames();
@@ -1153,6 +1076,14 @@
                     //ASP.NET异步后要重新再插入一次
                     //修改原有页面样式的函数
                     //todo
+                    //判断是否存在 我的票夹 页面的指定表格
+                    if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
+                        //修改原有页面样式的函数
+                        addAutoDeleteInvoiceButtons();//添加删除选中功能按钮
+
+                        //为批量删除功能的三个按钮绑定事件
+                        bindAutoDeleteButtonsEvents();
+                    }
 
                     Logger.log("ASP.NET异步回发完成");
                 });
