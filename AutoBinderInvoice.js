@@ -113,10 +113,10 @@
                 opacity: 0.9;
                 transform: translateY(-2px);
             }
-            .AutoBindInvoice_Btn-bind { background-color: #4CAF50; }
-            .AutoBindInvoice_Btn-unbind { background-color: #FF9800; }
+            .AutoBindInvoice_Btn-bind { background-color: #2196F3; }
+            .AutoBindInvoice_Btn-unbind { background-color: #4CAF50; }
             .AutoBindInvoice_Btn-stop { background-color: #f44336; }
-            .AutoBindInvoice_Btn-clear { background-color: #2196F3; }
+            .AutoBindInvoice_Btn-clear { background-color: #FF9800; }
             .AutoBindInvoice_Btn-toggle { background-color: #9C27B0; }
 
             /* 顶部按钮区域 */
