@@ -787,7 +787,7 @@
         try {
             if (win._alertHooked) return;
 
-            const originalAlert = window.alert;
+            const originalAlert = win.alert;
             win.alert = function (message) {
                 Logger.log("Alert frame URL:", win.location.href, ", name:", frameName, ", message:", message);
                 // debugger;
@@ -802,7 +802,7 @@
                 }
             };
 
-            const originalConfirm = window.confirm;
+            const originalConfirm = win.confirm;
             win.confirm = function (message) {
                 Logger.log("Confirm frame URL:", win.location.href, ", name:", frameName, ", message:", message);
                 // debugger;
@@ -819,7 +819,7 @@
                 //return true;
             };
 
-            // const originalPrompt = window.prompt;
+            // const originalPrompt = win.prompt;
             // win.prompt = function (message, defaultValue) {
             //     Logger.log("Prompt frame URL:",win.location.href);
             //     Logger.log("Prompt in frame:", frameName, ", message:", message);
