@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账-一键绑定/解绑发票
 // @namespace    http://tampermonkey.net/
-// @version      11.3
+// @version      11.4
 // @description  在税票录入页面，增加一键绑定、一键解绑功能
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
@@ -218,7 +218,7 @@
 
     // 配置参数（来自第一个脚本）
     const CONFIG = {
-        CHECK_INTERVAL: 500,      // 检查间隔
+        CHECK_INTERVAL: 200,      // 检查间隔
         MAX_WAIT_TIME: 5000,     // 最大等待时间
         BATCH_DELAY: 3000,        // 批次间延迟
         PAGE_REFRESH_CHECK: 5000, // 页面刷新检查间隔
@@ -852,13 +852,13 @@
                     updateTaskListDisplay();
                 }
 
-                // 根据结果决定等待时间
-                const waitTime = result.success ? 2000 : 3000;
+                // // 根据结果决定等待时间
+                // const waitTime = result.success ? 2000 : 3000;
 
-                // 等待期间检查是否停止
-                for (let i = 0; i < waitTime / 100 && isRunning; i++) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
+                // // 等待期间检查是否停止
+                // for (let i = 0; i < waitTime / 100 && isRunning; i++) {
+                //     await new Promise(resolve => setTimeout(resolve, 100));
+                // }
 
                 if (!isRunning) break;
             } catch (error) {
@@ -870,10 +870,10 @@
                     updateTaskListDisplay();
                 }
 
-                // 等待期间检查是否停止
-                for (let i = 0; i < 20 && isRunning; i++) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
+                // // 等待期间检查是否停止
+                // for (let i = 0; i < 20 && isRunning; i++) {
+                //     await new Promise(resolve => setTimeout(resolve, 100));
+                // }
 
                 if (!isRunning) break;
             }
@@ -1004,13 +1004,13 @@
                     updateTaskListDisplay();
                 }
 
-                // 根据结果决定等待时间
-                const waitTime = result.success ? 2000 : 3000;
+                // // 根据结果决定等待时间
+                // const waitTime = result.success ? 2000 : 3000;
 
-                // 等待期间检查是否停止
-                for (let i = 0; i < waitTime / 100 && isRunning; i++) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
+                // // 等待期间检查是否停止
+                // for (let i = 0; i < waitTime / 100 && isRunning; i++) {
+                //     await new Promise(resolve => setTimeout(resolve, 100));
+                // }
 
                 if (!isRunning) break;
             } catch (error) {
@@ -1022,10 +1022,10 @@
                     updateTaskListDisplay();
                 }
 
-                // 等待期间检查是否停止
-                for (let i = 0; i < 20 && isRunning; i++) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
+                // // 等待期间检查是否停止
+                // for (let i = 0; i < 20 && isRunning; i++) {
+                //     await new Promise(resolve => setTimeout(resolve, 100));
+                // }
 
                 if (!isRunning) break;
             }
