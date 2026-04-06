@@ -119,7 +119,7 @@
         // 样式：固定宽度+保留占位
         GM_addStyle(`
             /* 公共按钮样式 */
-            .autoDeleteBtn {
+            .AutoDeleteInvoice_Btn {
                 padding: 8px 16px;
                 font-size: 14px;
                 font-family: 'Microsoft YaHei', Arial, sans-serif;
@@ -134,28 +134,28 @@
                 color: white;
                 margin-left: 5px;
             }
-            .autoDeleteBtn:hover {
+            .AutoDeleteInvoice_Btn:hover {
                 opacity: 0.9;
                 transform: translateY(-2px);
             }
-            .autoDeleteBtn:active {
+            .AutoDeleteInvoice_Btn:active {
                 transform: translateY(1px);
             }
 
             /* 删除选中按钮 */
-            .autoDeleteBtn-delete-selected {
+            .AutoDeleteInvoice_Btn-delete-selected {
                 background-color: #f44336; /* 红色 */
                 width: 140px;
             }
 
             /* 停止任务按钮 */
-            .autoDeleteBtn-stop-task {
+            .AutoDeleteInvoice_Btn-stop-task {
                 background-color: #FF9800; /* 橙色 */
                 width: 110px;
             }
 
             /* 展开任务列表按钮 */
-            .autoDeleteBtn-expand-tasklist {
+            .AutoDeleteInvoice_Btn-expand-tasklist {
                 background-color: #2196F3; /* 蓝色 */
                 width: 170px;
             }
@@ -173,17 +173,17 @@
             <span style="display:inline-block;">
                 <input type="button" id="AutoDeleteInvoice_btnDeleteSelected"
                     value="删除选中发票"
-                    class="autoDeleteBtn autoDeleteBtn-delete-selected"
+                    class="AutoDeleteInvoice_Btn AutoDeleteInvoice_Btn-delete-selected"
                     style="visibility:visible;"
                     >
                 <input type="button" id="AutoDeleteInvoice_btnStopTask"
                     value="停止任务"
-                    class="autoDeleteBtn autoDeleteBtn-stop-task"
+                    class="AutoDeleteInvoice_Btn AutoDeleteInvoice_Btn-stop-task"
                     style="visibility:hidden;"
                     >
                 <input type="button" id="AutoDeleteInvoice_btnExpandTaskList"
                     value="展开关闭任务列表"
-                    class="autoDeleteBtn autoDeleteBtn-expand-tasklist"
+                    class="AutoDeleteInvoice_Btn AutoDeleteInvoice_Btn-expand-tasklist"
                     style="visibility:visible;"
                     >
             </span>
