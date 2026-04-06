@@ -649,7 +649,20 @@
         });
     }
 
-
+    // 获取目标表格--参数化目标表格id ===更新好===
+    /**
+     * 获取表格元素
+     * @function
+     * @param {string} [ElementId='ctl00_ContentPlaceHolder1_TR_WDPJ0'] - 表格的 DOM 元素 ID
+     * @returns {HTMLTableElement|null} 目标表格 DOM 元素
+     */
+    function getTable(ElementId = 'GV_ZDFPPL') {
+        const table = document.getElementById(ElementId);
+        if (!table) {
+            Logger.error("未找到 ID 为 " + ElementId + " 的表格。");
+        }
+        return table;
+    }
 
 
 
@@ -931,14 +944,7 @@
         };
     }
 
-    // 获取目标表格--参数化目标表格id ===更新好===
-    function getTable(ElementId = 'GV_ZDFPPL') {
-        const table = document.getElementById(ElementId);
-        if (!table) {
-            Logger.error("未找到 ID 为 " + ElementId + " 的表格。");
-        }
-        return table;
-    }
+
 
     
 
