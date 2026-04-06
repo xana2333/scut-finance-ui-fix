@@ -6,6 +6,8 @@
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/*
 // @match        https://wsyy.cw.scut.edu.cn/*
+// @match        http://wsyy-cw.webvpn.scut.edu.cn/*
+// @match        https://wsyy-cw.webvpn.scut.edu.cn/*
 // @grant        none
 // @run-at       document-start
 // ==/UserScript==
