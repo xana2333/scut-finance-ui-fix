@@ -462,8 +462,8 @@
                 // debugger;
 
                 //只替换指定消息的弹窗
-                if (message === "删除成功！" &&
-                    win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
+                if (message === "删除成功！") {// &&
+                    //win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
                     Logger.log("我的票夹页面[删除发票]动作收到回调-删除成功");
                 } else {
                     //其余消息放行
@@ -477,8 +477,8 @@
                 // debugger;
 
                 //只替换指定消息的弹窗
-                if (message === "注1意：删除后如果再需要用这张票的话，需要重新上传查验，您确定要删除吗？" &&
-                    win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
+                if (message === "注1意：删除后如果再需要用这张票的话，需要重新上传查验，您确定要删除吗？" ) { //&&
+                    //win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
                     Logger.log("我的票夹页面 自动确认删除发票对话框");
                     return true;
                 } else {
