@@ -273,6 +273,325 @@
         Logger.log("空白行添加成功");
     }
 
+
+    /** ==== 构建 UI部分 ==== **/
+    /** ==== 创建任务列表面板（包含按钮和折叠区） ==== **/
+    function AutoBindInvoice_createTaskPanel() {
+        if (document.getElementById('AutoBindInvoice_taskPanel')) return;
+
+        GM_addStyle(`
+            /* 面板整体 */
+            .AutoBindInvoice_panel {
+                position: fixed;
+                top: 60px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 99999;
+                background-color: rgba(255, 255, 255, 0.95);
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                width: 700px;
+                font-family: 'Microsoft YaHei', sans-serif;
+            }
+            /* 公共按钮样式 */
+            .AutoBindInvoice_Btn {
+                padding: 8px 16px;
+                font-size: 14px;
+                font-weight: bold;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                color: white;
+                margin-right: 8px;
+            }
+            .AutoBindInvoice_Btn:hover {
+                opacity: 0.9;
+                transform: translateY(-2px);
+            }
+            .AutoBindInvoice_Btn-bind { background-color: #4CAF50; }
+            .AutoBindInvoice_Btn-unbind { background-color: #FF9800; }
+            .AutoBindInvoice_Btn-stop { background-color: #f44336; }
+            .AutoBindInvoice_Btn-clear { background-color: #2196F3; }
+            .AutoBindInvoice_Btn-toggle { background-color: #9C27B0; }
+
+            /* 顶部按钮区域 */
+            .AutoBindInvoice_buttonRow {
+                padding: 8px;
+                border-bottom: 1px solid #ddd;
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+            }
+
+            /* 折叠内容区 */
+            .AutoBindInvoice_content {
+                padding: 8px;
+                display: none; /* 默认折叠 */
+            }
+
+            /* 状态栏 */
+            .AutoBindInvoice_statusBar {
+                display: flex;
+                gap: 20px;
+                margin-bottom: 8px;
+            }
+            .AutoBindInvoice_statusItem {
+                text-align: center;
+                font-size: 12px;
+            }
+            .AutoBindInvoice_statusValue {
+                font-size: 14px;
+                font-weight: bold;
+            }
+            .AutoBindInvoice_statusValue.green { color: green; }
+            .AutoBindInvoice_statusValue.orange { color: orange; }
+
+            /* 当前任务信息 */
+            #AutoBindInvoice_currentTask {
+                font-size: 14px;
+                color: #333;
+                margin-bottom: 8px;
+            }
+
+            /* 任务表格 */
+            .AutoBindInvoice_taskTable {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+            .AutoBindInvoice_taskTable th, .AutoBindInvoice_taskTable td {
+                border: 1px solid #ddd;
+                padding: 2px 8px;
+                font-size: 14px;
+                text-align: center;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .AutoBindInvoice_invoiceNo { width: 130px; }
+            .AutoBindInvoice_invoiceDate { width: 50px; }
+            .AutoBindInvoice_totalAmount { width: 60px; }
+            .AutoBindInvoice_statusCol { width: 45px; }
+            /* 状态颜色 */
+            .AutoBindInvoice_statusPending { background-color: #e0e0e0; color: #333; }
+            .AutoBindInvoice_statusProcessing { background-color: #2196F3; color: #fff; }
+            .AutoBindInvoice_statusSuccess { background-color: #4CAF50; color: #fff; }
+            .AutoBindInvoice_statusFailed { background-color: #f44336; color: #fff; }
+            .AutoBindInvoice_statusSkipped { background-color: #FF9800; color: #fff; }
+        `);
+
+        const panelHTML = `
+            <div id="AutoBindInvoice_taskPanel" class="AutoBindInvoice_panel">
+                <!-- 顶部按钮栏 -->
+                <div class="AutoBindInvoice_buttonRow">
+                    <input type="button" id="AutoBindInvoice_btnBindAll" value="一键绑定" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-bind">
+                    <input type="button" id="AutoBindInvoice_btnUnbindAll" value="一键解绑" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-unbind">
+                    <input type="button" id="AutoBindInvoice_btnStopTask" value="停止任务" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-stop" style="display:none;">
+                    <input type="button" id="AutoBindInvoice_btnClearList" value="清除列表" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-clear">
+                    <input type="button" id="AutoBindInvoice_btnTogglePanel" value="展开任务列表" class="AutoBindInvoice_Btn AutoBindInvoice_Btn-toggle">
+                </div>
+
+                <!-- 折叠内容区 -->
+                <div id="AutoBindInvoice_content" class="AutoBindInvoice_content">
+                    <div class="AutoBindInvoice_statusBar">
+                        <div class="AutoBindInvoice_statusItem">
+                            总任务数 <span class="AutoBindInvoice_statusValue" id="AutoBindInvoice_totalTasks">0</span>
+                        </div>
+                        <div class="AutoBindInvoice_statusItem">
+                            成功数 <span class="AutoBindInvoice_statusValue green" id="AutoBindInvoice_successTasks">0</span>
+                        </div>
+                        <div class="AutoBindInvoice_statusItem">
+                            待执行数 <span class="AutoBindInvoice_statusValue orange" id="AutoBindInvoice_pendingTasks">0</span>
+                        </div>
+                    </div>
+                    <div id="AutoBindInvoice_currentTask">当前任务：无</div>
+                    <table class="AutoBindInvoice_taskTable">
+                        <thead>
+                            <tr>
+                                <th class="AutoBindInvoice_invoiceNo">发票号</th>
+                                <th class="AutoBindInvoice_invoiceDate">开票日期</th>
+                                <th class="AutoBindInvoice_totalAmount">合计金额</th>
+                                <th class="AutoBindInvoice_statusCol">状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="AutoBindInvoice_taskTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', panelHTML);
+
+        // // 折叠开关逻辑
+        // document.getElementById('AutoBindInvoice_btnTogglePanel').addEventListener('click', () => {
+        //     const contentDiv = document.getElementById('AutoBindInvoice_content');
+        //     if (contentDiv.style.display === 'none' || contentDiv.style.display === '') {
+        //         contentDiv.style.display = 'block';
+        //         document.getElementById('AutoBindInvoice_btnTogglePanel').value = '收起任务列表';
+        //     } else {
+        //         contentDiv.style.display = 'none';
+        //         document.getElementById('AutoBindInvoice_btnTogglePanel').value = '展开任务列表';
+        //     }
+        // });
+
+        console.log("[AutoBindInvoice] 任务面板已创建");
+    }
+
+    /**
+     * 给面板按钮绑定事件
+     */
+    function AutoBindInvoice_bindButtonsEvents() {
+        // 一键绑定
+        const btnBind = document.getElementById('AutoBindInvoice_btnBindAll');
+        if (btnBind) {
+            btnBind.addEventListener('click', async () => {
+                if (!isRunning) {
+                    console.log('[AutoBindInvoice] 开始一键绑定流程...');
+                    taskList = [];
+                    // setupAutoConfirm(); // 你第一个脚本里的自动确认
+                    await processAutoBoundButtonsSerially(); // 调用你的绑定逻辑
+                }
+            });
+        }
+
+        // 一键解绑
+        const btnUnbind = document.getElementById('AutoBindInvoice_btnUnbindAll');
+        if (btnUnbind) {
+            btnUnbind.addEventListener('click', async () => {
+                if (!isRunning) {
+                    console.log('[AutoBindInvoice] 开始一键解绑流程...');
+                    taskList = [];
+                    setupAutoConfirm();
+                    await processAutoUnoundButtonsSerially(); // 调用你的解绑逻辑
+                }
+            });
+        }
+
+        // 停止任务
+        const btnStop = document.getElementById('AutoBindInvoice_btnStopTask');
+        if (btnStop) {
+            btnStop.addEventListener('click', () => {
+                console.log('[AutoBindInvoice] 手动停止任务');
+                isRunning = false;
+            });
+        }
+
+        // 清除列表
+        const btnClear = document.getElementById('AutoBindInvoice_btnClearList');
+        if (btnClear) {
+            btnClear.addEventListener('click', () => {
+                console.log('[AutoBindInvoice] 清空任务列表');
+                taskList = [];
+                AutoBindInvoice_updateUiDisplay();
+                document.getElementById('AutoBindInvoice_currentTask').textContent = '当前任务：无';
+            });
+        }
+
+        // 展开/收起任务列表（折叠区切换）
+        const btnToggle = document.getElementById('AutoBindInvoice_btnTogglePanel');
+        if (btnToggle) {
+            btnToggle.addEventListener('click', () => {
+                const contentDiv = document.getElementById('AutoBindInvoice_content');
+                if (contentDiv.style.display === 'none' || contentDiv.style.display === '') {
+                    contentDiv.style.display = 'block';
+                    btnToggle.value = '收起任务列表';
+                    AutoBindInvoice_updateUiDisplay();
+                } else {
+                    contentDiv.style.display = 'none';
+                    btnToggle.value = '展开任务列表';
+                }
+            });
+        }
+    }
+
+
+
+
+    /** ==== 更新 UI内容部分 ==== **/
+
+    /**
+     * 刷新任务面板显示
+     * 使用全局 taskList 数据
+     */
+    function AutoBindInvoice_updateUiDisplay() {
+        const totalTasksEl = document.getElementById('AutoBindInvoice_totalTasks');
+        const successTasksEl = document.getElementById('AutoBindInvoice_successTasks');
+        const pendingTasksEl = document.getElementById('AutoBindInvoice_pendingTasks');
+        const tbody = document.getElementById('AutoBindInvoice_taskTableBody');
+
+        if (!totalTasksEl || !successTasksEl || !pendingTasksEl || !tbody) {
+            console.warn('[AutoBindInvoice] 面板 DOM 不完整，无法刷新 UI');
+            return;
+        }
+
+        // 统计数据
+        const totalCount = taskList.length;
+        const successCount = taskList.filter(t => t.status === 'success').length;
+        const pendingCount = taskList.filter(t => t.status === 'pending').length;
+
+        // 更新顶部统计数字
+        totalTasksEl.textContent = totalCount;
+        successTasksEl.textContent = successCount;
+        pendingTasksEl.textContent = pendingCount;
+
+        // 清空现有表格数据
+        tbody.innerHTML = '';
+
+        // 填充表格
+        taskList.forEach(task => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td class="AutoBindInvoice_invoiceNo">${task.invoiceNo || ''}</td>
+            <td class="AutoBindInvoice_invoiceDate">${task.invoiceDate || ''}</td>
+            <td class="AutoBindInvoice_totalAmount">${task.totalAmount != null ? task.totalAmount : ''}</td>
+            <td class="AutoBindInvoice_statusCol AutoBindInvoice_status${task.status.charAt(0).toUpperCase() + task.status.slice(1)}">
+                ${getStatusText(task.status)}
+            </td>
+        `;
+            tbody.appendChild(row);
+        });
+    }
+
+    /**
+     * 更新当前任务信息
+     * @param {Object} task - 当前任务对象
+     */
+    function AutoBindInvoice_updateCurrentTaskInfo(task) {
+        const currentTaskEl = document.getElementById('AutoBindInvoice_currentTask');
+        if (!currentTaskEl) {
+            console.warn('[AutoBindInvoice] 当前任务信息元素不存在');
+            return;
+        }
+
+        if (!task) {
+            currentTaskEl.textContent = '当前任务：无';
+            return;
+        }
+
+        currentTaskEl.textContent = `当前任务：${task.invoiceNo || ''} (${task.invoiceDate || ''}) ${task.totalAmount != null ? task.totalAmount : ''} 元`;
+    }
+
+
+    
+    /** ==== 公共函数  ==== **/
+
+
+
+
+
+
+
+
+
+
+
+
+
     // 添加悬浮控制面板（来自第二个脚本）
     function addFloatingControlPanel() {
         if (document.getElementById('auto-bind-control-panel')) {
@@ -383,6 +702,12 @@
     }
 
     // 获取状态文本（来自第二个脚本）
+        /**
+     * 根据状态码返回状态文本
+     * @function
+     * @param {'pending' | 'processing' | 'success' | 'failed' | 'skipped'} status - 任务状态代码
+     * @returns {string} 对应的中文状态文本
+     */
     function getStatusText(status) {
         switch (status) {
             case 'pending': return '待执行';
@@ -564,6 +889,11 @@
     }
 
     // 检查页面是否忙碌（来自第一个脚本）
+    /**
+     * 检查页面是否忙碌（异步回发或未完全加载）
+     * @function
+     * @returns {boolean} 页面是否忙碌
+     */
     function isPageBusy() {
         // 检查是否有正在进行的异步回发
         if (typeof Sys !== 'undefined' &&
@@ -581,6 +911,12 @@
     }
 
     // 等待页面状态稳定（来自第一个脚本）
+    /**
+     * 等待页面状态稳定
+     * @function
+     * @param {number} [timeout=CONFIG.MAX_WAIT_TIME] - 最大等待时间（毫秒）
+     * @returns {Promise<boolean>} 页面是否在超时前稳定
+     */
     function waitForPageStable(timeout = CONFIG.MAX_WAIT_TIME) {
         return new Promise((resolve) => {
             const startTime = Date.now();
