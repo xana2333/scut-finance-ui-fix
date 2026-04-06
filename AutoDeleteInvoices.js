@@ -483,9 +483,9 @@
                     return true;
                 } else {
                     //其余消息放行
-                    originalConfirm(message);
+                    return originalConfirm(message);
                 }
-                return true;
+                //return true;
             };
 
             // const originalPrompt = window.prompt;
