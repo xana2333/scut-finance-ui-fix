@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账-批量删除发票1
 // @namespace    http://tampermonkey.net/
-// @version      3.1
+// @version      3.2
 // @description  在我的发票页面，增加批量删除发票功能
 // @author       XANA
 // @match        http://wsyy.cw.scut.edu.cn/*
@@ -669,8 +669,8 @@
                 // debugger;
 
                 //只替换指定消息的弹窗
-                if (message === "删除成功！" ||
-                    win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
+                if (message === "删除成功！" &&
+                    win.location.href.includes("/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
                     AutoDeleteInvoice_Logger.log("我的票夹页面[删除发票]动作收到回调-删除成功");
                 } else {
                     //其余消息放行
@@ -684,8 +684,8 @@
                 // debugger;
 
                 //只替换指定消息的弹窗
-                if (message === "注1意：删除后如果再需要用这张票的话，需要重新上传查验，您确定要删除吗？" ||
-                    win.location.href.includes("wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
+                if (message === "注意：删除后如果再需要用这张票的话，需要重新上传查验，您确定要删除吗？" ||
+                    win.location.href.includes("/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
                     AutoDeleteInvoice_Logger.log("我的票夹页面 自动确认删除发票对话框");
                     return true;
                 } else {
