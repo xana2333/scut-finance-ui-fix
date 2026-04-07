@@ -1,9 +1,13 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-财务查询
-// @namespace    http://tampermonkey.net/
-// @version      1.6
+// @namespace    http://github.com/xana2333/scut-finance-ui-fix/finance.inquiry.system/
+// @version      1.7
 // @description  解决查询系统首页大分辨率情况下UI错位、经费信息需要横向移动才能查看的问题
 // @author       XANA
+// @homepage     https://github.com/xana2333/scut-finance-ui-fix
+// @supportURL   https://github.com/xana2333/scut-finance-ui-fix
+// @updateURL    https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/finance.inquiry.system.js
+// @downloadURL  https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/finance.inquiry.system.js
 // @match        http://202.38.194.48:8182/*
 // @match        https://202.38.194.48:8182/*
 // @match        http://202-38-194-48-8182.webvpn.scut.edu.cn/*
