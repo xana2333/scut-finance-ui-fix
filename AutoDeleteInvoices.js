@@ -1,9 +1,13 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账-批量删除发票1
-// @namespace    http://tampermonkey.net/
-// @version      3.2
+// @namespace    http://github.com/xana2333/scut-finance-ui-fix/AutoDeleteInvoices/
+// @version      3.3
 // @description  在我的发票页面，增加批量删除发票功能
 // @author       XANA
+// @homepage     https://github.com/xana2333/scut-finance-ui-fix
+// @supportURL   https://github.com/xana2333/scut-finance-ui-fix
+// @updateURL    https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/AutoDeleteInvoices.js
+// @downloadURL  https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/AutoDeleteInvoices.js
 // @match        http://wsyy.cw.scut.edu.cn/*
 // @match        https://wsyy.cw.scut.edu.cn/*
 // @match        http://wsyy-cw.webvpn.scut.edu.cn/*
