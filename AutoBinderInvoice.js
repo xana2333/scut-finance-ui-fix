@@ -1,9 +1,13 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账-一键绑定/解绑发票
-// @namespace    http://tampermonkey.net/
-// @version      12.0
+// @namespace    http://github.com/xana2333/scut-finance-ui-fix/AutoBinderInvoice/
+// @version      12.1
 // @description  在税票录入页面，增加一键绑定、一键解绑功能
 // @author       XANA
+// @homepage     https://github.com/xana2333/scut-finance-ui-fix
+// @supportURL   https://github.com/xana2333/scut-finance-ui-fix
+// @updateURL    https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/AutoBinderInvoice.js
+// @downloadURL  https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/AutoBinderInvoice.js
 // @match        http://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
 // @match        https://wsyy.cw.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
 // @match        http://wsyy-cw.webvpn.scut.edu.cn/hnlgwsyy60/ifpCheckNew_WX.aspx*
