@@ -1,9 +1,13 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账
-// @namespace    http://tampermonkey.net/
-// @version      1.7
+// @namespace    http://github.com/xana2333/scut-finance-ui-fix/finance.online.reimbursement/
+// @version      1.8
 // @description  移除指定div的高度限制，让内容自适应；优化iframe高度
 // @author       XANA
+// @homepage     https://github.com/xana2333/scut-finance-ui-fix
+// @supportURL   https://github.com/xana2333/scut-finance-ui-fix
+// @updateURL    https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/finance.online.reimbursement.js
+// @downloadURL  https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/finance.online.reimbursement.js
 // @match        http://wsyy.cw.scut.edu.cn/*
 // @match        https://wsyy.cw.scut.edu.cn/*
 // @match        http://wsyy-cw.webvpn.scut.edu.cn/*
