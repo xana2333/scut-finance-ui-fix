@@ -44,8 +44,32 @@
     /** ==== 持久化配置文件相关 ==== **/
     const CONFIG_KEY = 'tampermonkeyuserConfig';
     const defaultConfig = {
-        enableOverridePopup: true,//覆写弹窗功能(跳过弹窗)
-        enableBatchDelete: true,//批量删除发票功能
+        enable_OnlineReimbursement_OverridePopup: true,                              // 网上报账系统-覆写弹窗功能(跳过弹窗)
+
+        enableAuto_OnlineReimbursement_BatchDeleteInvoice: true,                     // 网上报账系统-批量删除发票功能
+        enableAuto_OnlineReimbursement_BatchInvoiceBindingToggle: true,              // 网上报账系统-批量绑定/取消绑定发票功能
+        enableAuto_OnlineReimbursement_SelectAddedFundsInDailyReimbursement: true,   // 网上报账系统-自动选中日常报销中已添加经费
+
+        enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight: true,            // 修正网上报账系统UI-税票录入页面高度问题
+        enablefixUI_OnlineReimbursement_ProjectSelectPageTableHeight: true,         // 修正网上报账系统UI-项目选择（经费选择）页面表格高度问题
+        enablefixUI_OnlineReimbursement_ExpenseDetailPageTableHeight: true,         // 修正网上报账系统UI-费用明细页面表格高度问题
+
+        enablefixUI_FinanceQuery_UiMisalignment: true,           // 修正财务查询系统UI-首页表格错位问题
+        enablefixUI_FinanceQuery_TableCannotExpandFully: true    // 修正财务查询系统UI-表格无法完全展开问题
+
+        //按钮文本最长：禁用 网上报账覆写弹窗功能(跳过弹窗)(当前已已启用)
+        //✅网上报账批量删除发票功能(当前已启用)' : '⛔网
+        //禁用 网上报账覆写弹窗功能(跳过弹窗)(当前已已启用)
+        //✅网上报账-覆写弹窗功能(跳过弹窗)(当前已启用)
+        //✅网上报账-批量绑定/取绑发票功能(当前已启用)
+        //✅网上报账-自动选中日常报销已添加经费(当前已启用)
+        //✅网上报账修正UI-绑定发票表格高度(当前已启用)
+        //✅网上报账修正UI-经费选择表格高度(当前已启用)
+        //✅网上报账修正UI-费用明细表格高度(当前已启用)
+        //✅财务查询修正UI-首页表格错位(当前已启用)
+        //✅财务查询修正UI-表格无法完全展开(当前已启用)
+
+
 
     };
     let tampermonkeyuserConfig = GM_getValue(CONFIG_KEY, defaultConfig);// 从存储加载配置或使用默认值
@@ -69,14 +93,14 @@
             }
         }
 
-        menuIds.enableOverridePopup = GM_registerMenuCommand(
-            `${tampermonkeyuserConfig.enableOverridePopup ? '禁用 覆写弹窗功能(跳过弹窗)(当前已启用)' : '开启 覆写弹窗功能(跳过弹窗)(当前已禁用)'}`,
-            () => toggleFeature('enableOverridePopup')
+        menuIds.enable_OnlineReimbursement_OverridePopup = GM_registerMenuCommand(
+            `${tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup ? '禁用 覆写弹窗功能(跳过弹窗)(当前已启用)' : '开启 覆写弹窗功能(跳过弹窗)(当前已禁用)'}`,
+            () => toggleFeature('enable_OnlineReimbursement_OverridePopup')
         );
 
-        menuIds.enableBatchDelete = GM_registerMenuCommand(
-            `${tampermonkeyuserConfig.enableBatchDelete ? '禁用 批量删除发票功能(当前已启用)' : '开启 批量删除发票功能(当前已禁用)'}`,
-            () => toggleFeature('enableBatchDelete')
+        menuIds.enableAuto_OnlineReimbursement_BatchDeleteInvoice = GM_registerMenuCommand(
+            `${tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice ? '☒ 批量删除发票功能(当前已启用)' : '☑ 批量删除发票功能(当前已禁用)'}`,
+            () => toggleFeature('enableAuto_OnlineReimbursement_BatchDeleteInvoice')
         );
 
     }
@@ -1047,7 +1071,7 @@
             AutoDeleteInvoice_Logger.log("当前配置:", JSON.stringify(tampermonkeyuserConfig, null, 4));
 
             //判断是否使能 批量删除发票功能
-            if (tampermonkeyuserConfig.enableBatchDelete) {
+            if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice) {
                 //判断是否存在 我的票夹 页面的指定表格
                 if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
                     //修改原有页面样式的函数
@@ -1062,7 +1086,7 @@
             }
 
             //判断是否使能 覆写弹窗功能(跳过弹窗)
-            if (tampermonkeyuserConfig.enableOverridePopup) {
+            if (tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup) {
                 //用来覆写原始弹窗函数
                 hookAllFrames();
                 // 持续检测新 iframe
@@ -1079,7 +1103,7 @@
                     //修改原有页面样式的函数
 
                     //判断是否使能 批量删除发票功能
-                    if (tampermonkeyuserConfig.enableBatchDelete) {
+                    if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice) {
                         //判断是否存在 我的票夹 页面的指定表格
                         if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
                             //修改原有页面样式的函数
