@@ -54,7 +54,7 @@
         // 尝试插入，直到成功为止
         const insertDiv = setInterval(() => {
             //检查是否插入过
-            if(document.getElementById('FixfinanceQuerySYS_layoutSpacer_1px')){
+            if(document.getElementById('uiFix_financeQuerySYS_layoutSpacer_1px')){
                 clearInterval(insertDiv); // 成功后停止检测
             }
             // 精确匹配 id 为 div_mb 的元素
@@ -62,7 +62,7 @@
             if (target) {
                 let val =window_width*0.7;
                 let customWidth=val+ "px";
-                const htmlString = '<div class="all_content" id="FixfinanceQuerySYS_layoutSpacer_1px" style="width:' + customWidth + '; height: 1px;"></div>';
+                const htmlString = '<div class="all_content" id="uiFix_financeQuerySYS_layoutSpacer_1px" style="width:' + customWidth + '; height: 1px;"></div>';
 
                 // 'beforebegin' 表示插入到 target 元素的前面
                 target.insertAdjacentHTML('beforebegin', htmlString);
