@@ -42,7 +42,7 @@
     let taskList = [];
     let currentTaskIndex = 0;
 
-    function addEmptyRowAfterTrBd() {
+    function AutoBindInvoice_addEmptyRowAfterTrBd() {
         // 定位目标行
         const targetRow = document.getElementById('tr_bd');
         if (!targetRow) {
@@ -257,7 +257,7 @@
         //     }
         // });
 
-        console.log("[AutoBindInvoice] 任务面板已创建");
+        Logger.log("任务面板已创建");
     }
 
     /**
@@ -269,10 +269,10 @@
         if (btnBind) {
             btnBind.addEventListener('click', async () => {
                 if (!isRunning) {
-                    console.log('[AutoBindInvoice] 开始一键绑定流程...');
+                    Logger.log('开始一键绑定流程...');
                     taskList = [];
                     // setupAutoConfirm(); // 你第一个脚本里的自动确认
-                    await processAutoBoundButtonsSerially(); // 调用你的绑定逻辑
+                    await AutoBindInvoice_processAutoBoundButtonsSerially(); // 调用你的绑定逻辑
                 }
             });
         }
@@ -282,10 +282,10 @@
         if (btnUnbind) {
             btnUnbind.addEventListener('click', async () => {
                 if (!isRunning) {
-                    console.log('[AutoBindInvoice] 开始一键解绑流程...');
+                    Logger.log('开始一键解绑流程...');
                     taskList = [];
-                    setupAutoConfirm();
-                    await processAutoUnoundButtonsSerially(); // 调用你的解绑逻辑
+                    // setupAutoConfirm();
+                    await AutoBindInvoice_processAutoUnoundButtonsSerially(); // 调用你的解绑逻辑
                 }
             });
         }
@@ -294,7 +294,7 @@
         const btnStop = document.getElementById('AutoBindInvoice_btnStopTask');
         if (btnStop) {
             btnStop.addEventListener('click', () => {
-                console.log('[AutoBindInvoice] 手动停止任务');
+                Logger.log('手动停止任务');
                 isRunning = false;
             });
         }
@@ -303,7 +303,7 @@
         const btnClear = document.getElementById('AutoBindInvoice_btnClearList');
         if (btnClear) {
             btnClear.addEventListener('click', () => {
-                console.log('[AutoBindInvoice] 清空任务列表');
+                Logger.log('清空任务列表');
                 taskList = [];
                 AutoBindInvoice_updateUiDisplay();
                 document.getElementById('AutoBindInvoice_currentTask').textContent = '当前任务：无';
@@ -342,7 +342,7 @@
         const tbody = document.getElementById('AutoBindInvoice_taskTableBody');
 
         if (!totalTasksEl || !successTasksEl || !pendingTasksEl || !tbody) {
-            console.warn('[AutoBindInvoice] 面板 DOM 不完整，无法刷新 UI');
+            Logger.warn('面板 DOM 不完整，无法刷新 UI');
             return;
         }
 
@@ -381,7 +381,7 @@
     function AutoBindInvoice_updateCurrentTaskInfo(task) {
         const currentTaskEl = document.getElementById('AutoBindInvoice_currentTask');
         if (!currentTaskEl) {
-            console.warn('[AutoBindInvoice] 当前任务信息元素不存在');
+            Logger.warn('当前任务信息元素不存在');
             return;
         }
 
@@ -528,7 +528,7 @@
 
 
     // 扫描表格并创建【绑定】任务列表 ===更新好===
-    function scanTableAndCreateBoundTasks() {
+    function AutoBindInvoice_scanTableAndCreateBoundTasks() {
         const table = getTable('GV_ZDFPPL');
         if (!table) return [];
 
@@ -604,7 +604,7 @@
     }
 
     // 扫描表格并创建【取消绑定】任务列表 ===更新好===
-    function scanTableAndCreateUnboundTasks() {
+    function AutoBindInvoice_scanTableAndCreateUnboundTasks() {
         const table = getTable('GV_ZDFPPL');
         if (!table) return [];
 
@@ -679,7 +679,7 @@
     }
 
     // 等待[绑定]按钮状态变化 ===更新好===
-    function waitForBoundButtonStateChange(buttonId, timeout = CONFIG.MAX_WAIT_TIME) {
+    function AutoBindInvoice_waitForBoundButtonStateChange(buttonId, timeout = CONFIG.MAX_WAIT_TIME) {
         return new Promise((resolve) => {
             const startTime = Date.now();
 
@@ -714,7 +714,7 @@
     }
 
     // 等待[取消绑定]按钮状态变化 ===更新好===
-    function waitForUnboundButtonStateChange(buttonId, timeout = CONFIG.MAX_WAIT_TIME) {
+    function AutoBindInvoice_waitForUnboundButtonStateChange(buttonId, timeout = CONFIG.MAX_WAIT_TIME) {
         return new Promise((resolve) => {
             const startTime = Date.now();
 
@@ -751,7 +751,7 @@
 
 
     // 安全点击[绑定]按钮 ===更新好===
-    async function safeClickBoundButton(button) {
+    async function AutoBindInvoice_safeClickBoundButton(button) {
         if (!isRunning) return { success: false, reason: 'stopped' };
 
         try {
@@ -779,7 +779,7 @@
     }
 
     // 安全点击[取消绑定]按钮 ===更新好===
-    async function safeClickUnoundButton(button) {
+    async function AutoBindInvoice_safeClickUnoundButton(button) {
         if (!isRunning) return { success: false, reason: 'stopped' };
 
         try {
@@ -807,14 +807,14 @@
     }
 
     // 串行处理函数 一键绑定 功能
-    async function processAutoBoundButtonsSerially() {
+    async function AutoBindInvoice_processAutoBoundButtonsSerially() {
         isRunning = true;
         AutoBindInvoice_toggleButtonState(isRunning);
-        taskList = scanTableAndCreateBoundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateBoundTasks函数
+        taskList = AutoBindInvoice_scanTableAndCreateBoundTasks(); //此处返回的是list，内部obj定义见AutoBindInvoice_scanTableAndCreateBoundTasks函数
         AutoBindInvoice_updateUiDisplay();
         Logger.log("开始串行处理流程...");
         // Logger.log(`[一键绑定]taskList:`);
-        // console.log(taskList);
+        // Logger.log(taskList);
 
         while (isRunning) {
             const table = getTable('GV_ZDFPPL');
@@ -823,7 +823,7 @@
                 break;
             }
 
-            const nowList = scanTableAndCreateBoundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateBoundTasks函数
+            const nowList = AutoBindInvoice_scanTableAndCreateBoundTasks(); //此处返回的是list，内部obj定义见AutoBindInvoice_scanTableAndCreateBoundTasks函数
 
             const findSharedInvoices = (taskList, nowList) => {
                 const list1 = nowList;
@@ -850,7 +850,7 @@
 
             const workList = findSharedInvoices(taskList, nowList); //只操作taskList里有的按钮
             // Logger.log(`[一键绑定]workList:`);
-            // console.log(workList);
+            // Logger.log(workList);
 
             if (workList.length === 0) {
                 Logger.log("所有按钮已处理完毕！");
@@ -884,7 +884,7 @@
                 if (!isRunning) break;
 
                 // 安全点击按钮
-                const clickResult = await safeClickBoundButton(firstButton);
+                const clickResult = await AutoBindInvoice_safeClickBoundButton(firstButton);
 
                 if (!clickResult.success) {
                     Logger.warn(`按钮 ${buttonId} 点击失败: ${clickResult.reason}`);
@@ -908,7 +908,7 @@
                 }
 
                 // 等待按钮状态变化
-                const result = await waitForBoundButtonStateChange(buttonId);
+                const result = await AutoBindInvoice_waitForBoundButtonStateChange(buttonId);
                 Logger.log(`按钮 ${buttonId} 处理结果:`, result);
 
                 // 更新任务状态
@@ -960,14 +960,14 @@
     }
 
     // 串行处理函数 一键取消绑定 功能
-    async function processAutoUnoundButtonsSerially() {
+    async function AutoBindInvoice_processAutoUnoundButtonsSerially() {
         isRunning = true;
         AutoBindInvoice_toggleButtonState(isRunning);
-        taskList = scanTableAndCreateUnboundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateUnboundTasks函数
+        taskList = AutoBindInvoice_scanTableAndCreateUnboundTasks(); //此处返回的是list，内部obj定义见AutoBindInvoice_scanTableAndCreateUnboundTasks函数
         AutoBindInvoice_updateUiDisplay();
         Logger.log("开始串行处理流程...");
         //Logger.log(`[一键取消绑定]taskList:`);
-        //console.log(taskList);
+        //Logger.log(taskList);
 
         while (isRunning) {
             const table = getTable('GV_ZDFPPL');
@@ -976,7 +976,7 @@
                 break;
             }
 
-            const nowList = scanTableAndCreateUnboundTasks(); //此处返回的是list，内部obj定义见scanTableAndCreateUnboundTasks函数
+            const nowList = AutoBindInvoice_scanTableAndCreateUnboundTasks(); //此处返回的是list，内部obj定义见AutoBindInvoice_scanTableAndCreateUnboundTasks函数
 
             const findSharedInvoices = (taskList, nowList) => {
                 const list1 = nowList;
@@ -1003,7 +1003,7 @@
 
             const workList = findSharedInvoices(taskList, nowList); //只操作taskList里有的按钮
             // Logger.log(`[一键取消绑定]workList:`);
-            // console.log(workList);
+            // Logger.log(workList);
 
             if (workList.length === 0) {
                 Logger.log("所有按钮已处理完毕！");
@@ -1037,7 +1037,7 @@
                 if (!isRunning) break;
 
                 // 安全点击按钮
-                const clickResult = await safeClickUnoundButton(firstButton);
+                const clickResult = await AutoBindInvoice_safeClickUnoundButton(firstButton);
 
                 if (!clickResult.success) {
                     Logger.warn(`按钮 ${buttonId} 点击失败: ${clickResult.reason}`);
@@ -1061,7 +1061,7 @@
                 }
 
                 // 等待按钮状态变化
-                const result = await waitForUnboundButtonStateChange(buttonId);
+                const result = await AutoBindInvoice_waitForUnboundButtonStateChange(buttonId);
                 Logger.log(`按钮 ${buttonId} 处理结果:`, result);
 
                 // 更新任务状态
@@ -1122,7 +1122,7 @@
             AutoBindInvoice_bindButtonsEvents();//绑定控制面板按钮事件
 
             //在<tr id="tr_bd">后插入空行
-            addEmptyRowAfterTrBd();
+            AutoBindInvoice_addEmptyRowAfterTrBd();
 
             // 监听ASP.NET异步回发完成事件
             if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
@@ -1133,7 +1133,7 @@
                     //Logger.log("ASP.NET异步回发完成，重新绑定事件");
                     
                     //在<tr id="tr_bd">后插入空行
-                    addEmptyRowAfterTrBd();
+                    AutoBindInvoice_addEmptyRowAfterTrBd();
                     Logger.log("ASP.NET异步回发完成，重新插入空行");
                 });
             }
