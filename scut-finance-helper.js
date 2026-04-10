@@ -1,16 +1,22 @@
 // ==UserScript==
 // @name         SCUT Finance Helper
-// @namespace    https://github.com/yourusername/scut-finance-helper
+// @name:zh      SCUT财务系统小助手
+// @namespace    https://github.com/xana2333/scut-finance-ui-fix
 // @version      1.0.0
-// @description  🚀 华南理工大学网上报账系统 & 财务查询系统增强工具：自动化批量操作、UI修正功能，让报账更高效流畅。
-// @author       Your Name
-// @license      MIT
-// @match        https://*.scut.edu.cn/*
-// @match        http://*.scut.edu.cn/*
-// @icon         https://www.example.com/icon.png
-// @grant        none
-// @homepageURL  https://github.com/yourusername/scut-finance-helper
-// @supportURL   https://github.com/yourusername/scut-finance-helper/issues
-// @updateURL    https://github.com/yourusername/scut-finance-helper/raw/main/scut-finance-helper.meta.js
-// @downloadURL  https://github.com/yourusername/scut-finance-helper/raw/main/scut-finance-helper.user.js
+// @description  SCUT网上报账系统 & 财务查询系统辅助小工具：UI修正功能、自动化批量操作，让报账更高效流畅。
+// @author       XANA
+// @homepage     https://github.com/xana2333/scut-finance-ui-fix
+// @supportURL   https://github.com/xana2333/scut-finance-ui-fix
+// @updateURL    https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/AutoDeleteInvoices.js
+// @downloadURL  https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/AutoDeleteInvoices.js
+// @match        http://wsyy.cw.scut.edu.cn/*
+// @match        https://wsyy.cw.scut.edu.cn/*
+// @match        http://wsyy-cw.webvpn.scut.edu.cn/*
+// @match        https://wsyy-cw.webvpn.scut.edu.cn/*
+// @grant        GM_addStyle
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_registerMenuCommand
+// @grant        GM_unregisterMenuCommand
 // ==/UserScript==
+
