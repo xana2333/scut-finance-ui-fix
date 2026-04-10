@@ -2,7 +2,7 @@
 // @name         SCUT Finance Helper
 // @name:zh      SCUT财务系统小助手
 // @namespace    https://github.com/xana2333/scut-finance-ui-fix
-// @version      1.0.9
+// @version      1.0.10
 // @description  SCUT网上报账系统 & 财务查询系统辅助小工具：UI修正功能、自动化批量操作，让报账更高效流畅。
 // @author       XANA
 // @homepage     https://github.com/xana2333/scut-finance-ui-fix
@@ -30,7 +30,7 @@
     /** ==== 持久化配置文件相关 ==== **/
     const CONFIG_KEY = 'tampermonkeyuserConfig';
     const defaultConfig = {
-        enable_OnlineReimbursement_OverridePopup: true,                              // 网上报账系统-覆写弹窗功能(跳过弹窗)
+        enable_OnlineReimbursement_OverridePopup: false,                              // 网上报账系统-覆写弹窗功能(跳过弹窗)
 
         enableAuto_OnlineReimbursement_BatchDeleteInvoice: true,                     // 网上报账系统-批量删除发票功能
         enableAuto_OnlineReimbursement_BatchInvoiceBindingToggle: true,              // 网上报账系统-批量绑定/取消绑定发票功能
@@ -46,26 +46,34 @@
 
     // 功能描述，用于菜单显示
     const FEATURE_LABELS = {
-        enable_OnlineReimbursement_OverridePopup: '网上报账-覆写弹窗功能(跳过弹窗)',
+
         enableAuto_OnlineReimbursement_BatchDeleteInvoice: '网上报账-批量删除发票功能',
         enableAuto_OnlineReimbursement_BatchInvoiceBindingToggle: '网上报账-批量绑定/取绑发票功能',
         enableAuto_OnlineReimbursement_SelectAddedFundsInDailyReimbursement: '网上报账-自动选中日常报销已添加经费',
-        enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight: '网上报账修正UI-绑定发票表格高度',
+
+        enable_OnlineReimbursement_OverridePopup: '网上报账-覆写弹窗功能(跳过弹窗)',
+
         enablefixUI_OnlineReimbursement_ProjectSelectPageTableHeight: '网上报账修正UI-经费选择表格高度',
         enablefixUI_OnlineReimbursement_ExpenseDetailPageTableHeight: '网上报账修正UI-费用明细表格高度',
+        enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight: '网上报账修正UI-绑定发票表格高度',
+
         enablefixUI_FinanceQuery_UiMisalignment: '财务查询修正UI-首页表格错位',
         enablefixUI_FinanceQuery_TableCannotExpandFully: '财务查询修正UI-表格无法完全展开'
     };
 
     // 控制菜单排序的数组
     const MENU_ORDER = [
-        'enable_OnlineReimbursement_OverridePopup',
+
         'enableAuto_OnlineReimbursement_BatchDeleteInvoice',
         'enableAuto_OnlineReimbursement_BatchInvoiceBindingToggle',
         'enableAuto_OnlineReimbursement_SelectAddedFundsInDailyReimbursement',
-        'enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight',
+
+        // 'enable_OnlineReimbursement_OverridePopup',
+
         'enablefixUI_OnlineReimbursement_ProjectSelectPageTableHeight',
         'enablefixUI_OnlineReimbursement_ExpenseDetailPageTableHeight',
+        'enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight',
+
         'enablefixUI_FinanceQuery_UiMisalignment',
         'enablefixUI_FinanceQuery_TableCannotExpandFully'
     ];
@@ -1049,16 +1057,25 @@
     function hookWindow(win, frameName) {
         try {
             if (win._alertHooked) return;
+            console.log("[hookWindow] frame URL:", win.location.href, ", name:", frameName);
 
             const originalAlert = win.alert;
             win.alert = function (message) {
-                AutoDeleteInvoice_Logger.log("Alert frame URL:", win.location.href, ", name:", frameName, ", message:", message);
+                console.log("[hookWindow]Alert frame URL:", win.location.href, ", name:", frameName, ", message:", message);
                 // debugger;
 
-                //只替换指定消息的弹窗
-                if (message === "删除成功！" &&
+                //只在启用批量删除发票功能时替换指定消息的弹窗
+                if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice && 
+                    message === "删除成功！" &&
                     win.location.href.includes("/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
-                    AutoDeleteInvoice_Logger.log("我的票夹页面[删除发票]动作收到回调-删除成功");
+                    console.log("[hookWindow]我的票夹页面[删除发票]动作收到回调-删除成功");
+                    return true;
+                }
+
+                //使能 覆写弹窗功能(跳过弹窗)
+                if (tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup) {
+                    console.log("[hookWindow]覆写Alert URL:",win.location.href,", message:",message);
+                    fixUI_PopupUI_showAlert(message);
                 } else {
                     //其余消息放行
                     originalAlert(message);
@@ -1067,14 +1084,20 @@
 
             const originalConfirm = win.confirm;
             win.confirm = function (message) {
-                AutoDeleteInvoice_Logger.log("Confirm frame URL:", win.location.href, ", name:", frameName, ", message:", message);
+                console.log("Confirm frame URL:", win.location.href, ", name:", frameName, ", message:", message);
                 // debugger;
 
-                //只替换指定消息的弹窗
-                if (message === "注意：删除后如果再需要用这张票的话，需要重新上传查验，您确定要删除吗？" ||
+                //只在启用批量删除发票功能时替换指定消息的弹窗
+                if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice && 
+                    message === "注意：删除后如果再需要用这张票的话，需要重新上传查验，您确定要删除吗？" &&
                     win.location.href.includes("/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
-                    AutoDeleteInvoice_Logger.log("我的票夹页面 自动确认删除发票对话框");
+                    console.log("[hookWindow]我的票夹页面 自动确认删除发票对话框");
                     return true;
+                } 
+
+                //使能 覆写弹窗功能(跳过弹窗)
+                if (tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup) {
+                    return fixUI_PopupUI_showConfirm(message);
                 } else {
                     //其余消息放行
                     return originalConfirm(message);
@@ -1084,15 +1107,15 @@
 
             // const originalPrompt = win.prompt;
             // win.prompt = function (message, defaultValue) {
-            //     AutoDeleteInvoice_Logger.log("Prompt frame URL:",win.location.href);
-            //     AutoDeleteInvoice_Logger.log("Prompt in frame:", frameName, ", message:", message);
+            //     console.log("Prompt frame URL:",win.location.href);
+            //     console.log("Prompt in frame:", frameName, ", message:", message);
             //     // debugger;
             //     return defaultValue;
             // };
 
             win._alertHooked = true;
         } catch (e) {
-            AutoDeleteInvoice_Logger.warn("Cannot hook frame:", frameName, e);
+            console.warn("Cannot hook frame:", frameName, e);
         }
     }
     /**
@@ -1105,6 +1128,173 @@
             hookWindow(window.frames[i], `frame-${i}`);
         }
     }
+
+    //创建弹出窗口的容器
+    function fixUI_PopupUI_ensureContainer() {
+        let container = document.getElementById('fixUI_PopupUI_container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'fixUI_PopupUI_container';
+            Object.assign(container.style, {
+                position: 'fixed',
+                top: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',  // 将元素中心对齐到中间
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+                zIndex: 99999
+            });
+            document.body.appendChild(container);
+        }
+        return container;
+    }
+
+    //创建弹出窗口条目的css
+    function fixUI_PopupUI_injectStyles() {
+        if (document.getElementById('fixUI_PopupUI_styles')) return;
+        const styleEl = document.createElement('style');
+        styleEl.id = 'fixUI_PopupUI_styles';
+        styleEl.textContent = `
+            .fixUI_PopupUI_box{
+                padding: 10px 20px;
+                border-radius: 5px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                opacity:1;
+                transition: opacity 0.5s, transform 0.3s;
+                pointer-events:auto;
+                font-size:14px;
+                display:flex;
+                flex-direction: column;      /* 改成纵向排列，文本和按钮分行 */
+                align-items: center;         /* 元素居中 */
+                color:#fff;
+                max-width: 400px;            /* 最大宽度 */
+                word-break: break-word;      /* 自动换行 */
+                white-space: normal;
+            }
+            .fixUI_PopupUI_fadeout{
+                opacity:0;
+                transform:translateX(50px);
+            }
+            .fixUI_PopupUI_success {background-color: rgba(40, 167, 69, 0.9);}
+            .fixUI_PopupUI_info    {background-color: rgba(33, 150, 243, 0.9);}
+            .fixUI_PopupUI_warning {background-color: rgba(255, 193, 7, 0.9); color: #000;}
+            .fixUI_PopupUI_error   {background-color: rgba(220, 53, 69, 0.9);}
+            /* Alert 内部容器（左右排列：左文字 + 右按钮） */
+            .alertContentContainer{
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            /* 红色关闭按钮（右列） */
+            .alertCloseBtn{
+                background: red;
+                color: #fff;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: bold;
+                flex-shrink: 0; /* 防止按钮被压缩 */
+            }
+            /* 确认按钮容器（单独占一行居中） */
+            .fixUI_PopupUI_confirmBtns{
+                margin-top: 10px;
+                display:flex;
+                flex-direction: row;         /* 横向排列按钮 */
+                justify-content: center;     /* 居中 */
+                gap:10px;
+                width: 100%;
+            }
+            .fixUI_PopupUI_confirmBtns button{
+                background:#444;
+                color:#fff;
+                border:none;
+                padding:5px 10px;
+                border-radius:3px;
+                cursor:pointer;
+            }
+        `;
+        document.head.appendChild(styleEl);
+    }
+
+    //移除弹窗
+    function fixUI_PopupUI_removeBox(box) {
+        box.classList.add('fixUI_PopupUI_fadeout');
+        setTimeout(() => box.remove(), 500);
+    }
+
+    //构建alert弹窗
+    function fixUI_PopupUI_showAlert(msg, type = 'info', timeout = 5000) {
+        fixUI_PopupUI_injectStyles();
+        const container = fixUI_PopupUI_ensureContainer();
+        const box = document.createElement('div');
+        box.className = `fixUI_PopupUI_box fixUI_PopupUI_${type}`;
+
+        // 内部容器（横排：文字左，按钮右）
+        const innerContainer = document.createElement('div');
+        innerContainer.className = 'alertContentContainer';
+
+        // 左文字
+        const textSpan = document.createElement('div');
+        textSpan.textContent = msg;
+
+        // 右按钮
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'alertCloseBtn';
+        closeBtn.textContent = '关闭';
+        closeBtn.onclick = () => fixUI_PopupUI_removeBox(box);
+
+        // 横排加入
+        innerContainer.appendChild(textSpan);
+        innerContainer.appendChild(closeBtn);
+        box.appendChild(innerContainer);
+
+        container.appendChild(box);
+
+        if (timeout > 0) {
+            setTimeout(() => fixUI_PopupUI_removeBox(box), timeout);
+        }
+    }
+
+    //构建confirm弹窗
+    function fixUI_PopupUI_showConfirm(msg) {
+        fixUI_PopupUI_injectStyles();
+        return new Promise(resolve => {
+            const container = fixUI_PopupUI_ensureContainer();
+            const box = document.createElement('div');
+            box.className = `fixUI_PopupUI_box fixUI_PopupUI_info`;
+            box.textContent = msg;
+
+            const btnContainer = document.createElement('div');
+            btnContainer.className = 'fixUI_PopupUI_confirmBtns';
+
+            const okBtn = document.createElement('button');
+            okBtn.textContent = '确定';
+            okBtn.onclick = () => { fixUI_PopupUI_removeBox(box); resolve(true); };
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = '取消';
+            cancelBtn.onclick = () => { fixUI_PopupUI_removeBox(box); resolve(false); };
+
+            btnContainer.appendChild(okBtn);
+            btnContainer.appendChild(cancelBtn);
+            box.appendChild(btnContainer);
+
+            container.appendChild(box);
+        });
+    }
+
+
+
+
+
+
+
+
 
     //========================================================================================================
 
@@ -2317,6 +2507,30 @@
             let window_width = window.innerWidth;
             console.log("[SCUT Finance Helper]currentUrl " + currentUrl + " 当前宽度为: " + window_width + "px");
 
+            fixUI_PopupUI_ensureContainer();//创建弹出窗口的容器
+            fixUI_PopupUI_injectStyles();//创建弹出窗口条目的css
+
+           
+            // fixUI_PopupUI_showAlert("45333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333366123info","info",2000000);
+            // fixUI_PopupUI_showAlert("123success","success",2000000);
+            // fixUI_PopupUI_showAlert("123warning","warning",2000000);
+            // fixUI_PopupUI_showAlert("123error","error",2000000);
+
+
+
+
+            // fixUI_PopupUI_showConfirm("45333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333366");
+
+            //判断是否使能 覆写弹窗功能(跳过弹窗)
+            // if (tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup) {
+            //用来覆写原始弹窗函数
+            hookAllFrames();
+            // 持续检测新 iframe
+            setInterval(() => {
+                hookAllFrames();
+            }, 1000);
+            // }
+
             //判断是否使能 批量删除发票功能
             if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice) {
                 //判断是否存在 我的票夹 页面的指定表格
@@ -2332,15 +2546,7 @@
                 }
             }
 
-            //判断是否使能 覆写弹窗功能(跳过弹窗)
-            if (tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup) {
-                //用来覆写原始弹窗函数
-                hookAllFrames();
-                // 持续检测新 iframe
-                setInterval(() => {
-                    hookAllFrames();
-                }, 1000);
-            }
+
 
             //判断是否使能 批量绑定/取消绑定发票功能
             if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchInvoiceBindingToggle &&
