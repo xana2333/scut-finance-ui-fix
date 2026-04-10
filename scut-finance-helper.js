@@ -245,6 +245,48 @@
         return resultList;// 返回包含匹配任务的新列表
     }
 
+    // 获得iframe对象宽高的函数
+    function getIframeSize(iframe) {
+        if (!iframe || iframe.tagName !== 'IFRAME') {
+            throw new Error('传入的元素不是 iframe');
+        }
+
+        try {
+            // 尝试获取内部文档的高度和宽度
+            // 注意：如果是跨域 iframe，此处会报错进入 catch
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            if (doc && doc.body) {
+                const height = doc.body.scrollHeight;
+                const width = doc.body.scrollWidth;
+
+                return {
+                    width: width,
+                    height: height,
+                    isCrossOrigin: false,
+                    success: height > 0
+                };
+            } else {
+                // 文档未完全加载或 body 不存在
+                return {
+                    width: iframe.offsetWidth,
+                    height: iframe.offsetHeight,
+                    isCrossOrigin: false,
+                    success: false,
+                    reason: 'iframe 内容未完全加载'
+                };
+            }
+        } catch (e) {
+            // 跨域情况，只能获取 iframe 标签本身的尺寸
+            return {
+                width: iframe.offsetWidth,
+                height: iframe.offsetHeight,
+                isCrossOrigin: true,
+                success: true,
+                reason: '跨域限制，仅能获取标签占位尺寸'
+            };
+        }
+    }
+
     //========================================================================================================
 
 
@@ -2056,7 +2098,7 @@
         // 使用 GM_addStyle 注入自定义CSS规则，解决首页经费表格太宽，但是容器窗口太小的问题。
         // 这会覆盖 .main 类的 width: 980px;
         // 这会覆盖 .width 类的 width: 960px;
-         // 注入样式
+        // 注入样式
         const styleEl = GM_addStyle(`
             .main {
                 min-width: 980px; /*增加最小宽度（与原来保持一致），避免它过小带来新问题*/
@@ -2105,7 +2147,25 @@
     }
 
 
+    // 修复项目选择（经费选择）表格高度问题 - 用 CSS 方式永久覆盖
+    function fixUI_OnlineReimbursement_ProjectSelectPageTableHeight() {
+        // 检查是否已经注入过，防止重复添加
+        if (document.getElementById('fixUI_ProjectSelectPageTableHeightStyle')) return;
 
+        // 使用 GM_addStyle 注入规则
+        const styleEl = GM_addStyle(`
+            /* 覆盖 id=ctl00_ContentPlaceHolder1_div_xmtb 的高度 */
+            #ctl00_ContentPlaceHolder1_div_xmtb {
+                height: auto !important; /* 不论原来是什么值，都强制改为自动高度 */
+                min-height: 600px;
+            }
+        `);
+
+        // 给样式标签加 ID，方便后续检查/删除
+        styleEl.id = 'fixUI_ProjectSelectPageTableHeightStyle';
+
+        console.log('[fixUI 网上报账] 经费选择表格高度样式已注入');
+    }
 
 
 
@@ -2188,10 +2248,18 @@
                 }
             }
 
+            //判断是否使能 修复项目选择（经费选择）表格高度问题
+            if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_ProjectSelectPageTableHeight) {
+                if (getTable('ctl00_ContentPlaceHolder1_div_xmtb')) {
+                    fixUI_OnlineReimbursement_ProjectSelectPageTableHeight();
+                }
+            }
+
             // 监听ASP.NET异步回发完成事件
             if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
                 const prm = Sys.WebForms.PageRequestManager.getInstance();
                 prm.add_endRequest(function (sender, args) {
+                    console.log("[SCUT Finance Helper]ASP.NET异步回发开始.....");
                     //ASP.NET异步后要重新再插入一次
                     //修改原有页面样式的函数
 
@@ -2201,9 +2269,11 @@
                         if (getTable('ctl00_ContentPlaceHolder1_TR_WDPJ0')) {
                             //修改原有页面样式的函数
                             AutoDeleteInvoice_addButtons();//添加删除选中功能按钮
+                            AutoDeleteInvoice_Logger.log("[批量删除发票]ASP.NET异步回发完成，相关功能按钮已添加");
 
                             //为批量删除功能的三个按钮绑定事件
                             AutoDeleteInvoice_bindButtonsEvents();
+                            AutoDeleteInvoice_Logger.log("[批量删除发票]ASP.NET异步回发完成，相关功能按钮绑定事件已添加");
                         }
                     }
 
@@ -2217,6 +2287,15 @@
 
                         AutoClicker_Logger.log("ASP.NET异步回发完成，重新插入空行");
                     }
+
+                    //判断是否使能 修复项目选择（经费选择）表格高度问题
+                    if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_ProjectSelectPageTableHeight) {
+                        if (getTable('ctl00_ContentPlaceHolder1_div_xmtb')) {
+                            fixUI_OnlineReimbursement_ProjectSelectPageTableHeight();
+                            console.log("[fixUI 网上报账]ASP.NET异步回发完成,项目选择（经费选择）表格高度样式已注入");
+                        }
+                    }
+
 
                     console.log("[SCUT Finance Helper]ASP.NET异步回发完成");
                 });
