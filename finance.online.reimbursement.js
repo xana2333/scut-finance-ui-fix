@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCUT财务系统UI优化-网上报账
 // @namespace    http://github.com/xana2333/scut-finance-ui-fix/finance.online.reimbursement/
-// @version      1.8
+// @version      1.9
 // @description  移除指定div的高度限制，让内容自适应；优化iframe高度
 // @author       XANA
 // @homepage     https://github.com/xana2333/scut-finance-ui-fix
@@ -117,7 +117,7 @@
     //======================= 在项目选择（经费选择）页面，当有且仅有1个经费被添加时，自动选择该经费===========================
     //项目选择 经费选择id=ctl00_ContentPlaceHolder1_GV_RCXMXX
     // 监听DOM变化,id=ctl00_ContentPlaceHolder1_GV_RCXMXX
-    const ctl00_ContentPlaceHolder1_GV_RCXMXX = new MutationObserver(function(mutations) {
+    const DOM_Observer_ctl00_ContentPlaceHolder1_GV_RCXMXX = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             // 检查新增的节点
             mutation.addedNodes.forEach(function(node) {
@@ -140,7 +140,7 @@
     function init_auto_Select_ctl00_ContentPlaceHolder1_GV_RCXMXX() {
         auto_Select_ctl00_ContentPlaceHolder1_GV_RCXMXX();
         // 开始监听iframe相关的DOM变化
-        DOM_Observer_ctl00_ContentPlaceHolder1_div_xmtb.observe(document.body, {
+        DOM_Observer_ctl00_ContentPlaceHolder1_GV_RCXMXX.observe(document.body, {
             childList: true,
             subtree: true
         });
