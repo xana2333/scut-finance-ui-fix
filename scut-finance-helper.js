@@ -2,7 +2,7 @@
 // @name         SCUT Finance Helper
 // @name:zh      SCUT财务系统小助手
 // @namespace    https://github.com/xana2333/scut-finance-ui-fix
-// @version      1.0.8
+// @version      1.0.9
 // @description  SCUT网上报账系统 & 财务查询系统辅助小工具：UI修正功能、自动化批量操作，让报账更高效流畅。
 // @author       XANA
 // @homepage     https://github.com/xana2333/scut-finance-ui-fix
@@ -2216,7 +2216,84 @@
     }
 
 
+    //==================== 网上报账系统-自动选中日常报销中已添加经费 ====================================
+    //当项目选择（经费选择）页面有且只有1个已录入经费，自动勾选该经费
+    function autoSelect_FundingRow() {
+        const table = document.getElementById('ctl00_ContentPlaceHolder1_GV_RCXMXX');
 
+        if (table && table.tagName === 'TABLE') {
+            // console.log('找到id=ctl00_ContentPlaceHolder1_GV_RCXMXX 的表格:');
+
+            // 获取表格的所有行
+            const rows = table.querySelectorAll('tr');
+            // console.log('表格行数:', rows.length);
+
+            // // 遍历每一行并输出内容
+            // rows.forEach((row, index) => {
+            //     const cells = row.querySelectorAll('td, th');
+            //     const cellContents = Array.from(cells).map(cell =>
+            //         cell.textContent.trim().replace(/\s+/g, ' ')
+            //     );
+
+            //     //console.log(`第 ${index + 1} 行:`, cellContents);
+            // });
+
+            // 检查条件：行数为2，且第二行的第二个元素不为空
+            if (rows.length === 2) {
+                const secondRow = rows[1]; // 第二行（索引为1）
+                const cellsInSecondRow = secondRow.querySelectorAll('td, th');
+
+                if (cellsInSecondRow.length >= 2) { // 确保至少有2列
+                    const secondCellContent = cellsInSecondRow[1].textContent.trim(); // 第二个元素（索引为1）
+
+                    if (secondCellContent !== '') {
+                        console.log("table id=ctl00_ContentPlaceHolder1_GV_RCXMXX 的表格有且仅有2行，且第二行不为空:");
+                        // 查找第七列（索引为6）的复选框并点击
+                        if (cellsInSecondRow.length >= 7) {
+                            const seventhCell = cellsInSecondRow[6]; // 第七列（索引6）
+                            const checkbox = seventhCell.querySelector('input[type="checkbox"]');
+
+                            if (checkbox) {
+                                console.log('找到复选框，准备点击:', checkbox);
+
+                                // 方法1: 直接点击
+                                try {
+                                    checkbox.checked = true;
+                                    // console.log('复选框已点击');
+                                    console.log('验证复选框最终状态:', checkbox.checked);
+                                } catch (error) {
+                                    console.log('直接点击失败，尝试触发事件:', error);
+
+                                    // 方法2: 创建并触发click事件
+                                    /**/ const event = new MouseEvent('click', {
+                                        bubbles: true,
+                                        cancelable: true,
+                                        view: window
+                                    });
+                                    checkbox.dispatchEvent(event);
+                                    console.log('通过事件触发点击');
+                                }
+                            } else {
+                                console.log('第七列没有找到复选框');
+                            }
+                        } else {
+                            console.log(`第七列不存在，当前列数: ${cellsInSecondRow.length}`);
+                        }
+                    } else {
+                        console.log('条件不满足：第二行的第二个元素为空');
+                    }
+                } else {
+                    console.log('条件不满足：第二行的列数少于2');
+                }
+            } else {
+                console.log(`条件不满足：表格行数不是2（当前行数：${rows.length}）`);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
 
 
 
@@ -2314,7 +2391,15 @@
             if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight) {
                 if (document.getElementById('ctl00_ContentPlaceHolder1_fm_wx')) {
                     fixUI_OnlineReimbursement_InvoiceBindingIFRAME();
-                    console.log("[fixUI 网上报账]-税票录入页面绑定发票表格iframe高度已更改");
+                    console.log("[fixUI 网上报账]税票录入页面绑定发票表格iframe高度已更改");
+                }
+            }
+
+            //判断是否使能 网上报账系统-自动选中日常报销中已添加经费
+            if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_SelectAddedFundsInDailyReimbursement) {
+                if (document.getElementById('ctl00_ContentPlaceHolder1_GV_RCXMXX')) {
+                    autoSelect_FundingRow();
+                    console.log("[autoSelect_FundingRow]已自动选中存在的经费行");
                 }
             }
 
@@ -2374,6 +2459,14 @@
                         if (document.getElementById('ctl00_ContentPlaceHolder1_fm_wx')) {
                             fixUI_OnlineReimbursement_InvoiceBindingIFRAME();
                             console.log("[fixUI 网上报账]-税票录入页面绑定发票表格iframe高度已更改");
+                        }
+                    }
+
+                    //判断是否使能 网上报账系统-自动选中日常报销中已添加经费
+                    if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_SelectAddedFundsInDailyReimbursement) {
+                        if (document.getElementById('ctl00_ContentPlaceHolder1_GV_RCXMXX')) {
+                            autoSelect_FundingRow();
+                            console.log("[autoSelect_FundingRow]已自动选中存在的经费行");
                         }
                     }
 
