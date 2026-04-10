@@ -88,6 +88,7 @@
         // 定位父容器
         const container = document.getElementById('ctl00_ContentPlaceHolder1_PN_BXNR');
         if (!container) return;
+        if (document.getElementById('uiFix_expenseDetailContent')) return;
 
         // 1. 获取容器内【所有层级】的 div
         const allDivs = container.querySelectorAll('div');
@@ -102,6 +103,7 @@
         // 3. 如果找到了，执行修改并终止循环/监听
         if (targetDiv) {
             targetDiv.style.height = '100%';
+            targetDiv.id = 'uiFix_expenseDetailContent';
             console.log('已找到div id=ctl00_ContentPlaceHolder1_PN_BXNR 深层级中的第一个 height: 600px 并改为 100%');
 
             // 任务完成，清除定时器
