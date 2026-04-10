@@ -2,7 +2,7 @@
 // @name         SCUT Finance Helper
 // @name:zh      SCUT财务系统小助手
 // @namespace    https://github.com/xana2333/scut-finance-ui-fix
-// @version      1.0.5
+// @version      1.0.8
 // @description  SCUT网上报账系统 & 财务查询系统辅助小工具：UI修正功能、自动化批量操作，让报账更高效流畅。
 // @author       XANA
 // @homepage     https://github.com/xana2333/scut-finance-ui-fix
@@ -2116,7 +2116,7 @@
         // 手动加 ID 标记，这样以后就能用 getElementById 检查
         styleEl.id = "fixUI_FinanceQuery_TableCannotExpandFully-FixWidthWidth";
 
-        console.log("[fixUI 财务查询]修正首页表格宽度问题Fixed width restrictions removed for .main and .width classes.");
+        // console.log("[fixUI 财务查询]修正首页表格宽度问题Fixed width restrictions removed for .main and .width classes.");
 
     }
 
@@ -2168,8 +2168,52 @@
     }
 
 
+    //==================== 修复 费用明细 页面项目选择表格高度问题 ====================================
+    //修复 费用明细 页面项目选择表格高度问题
+    function fixUI_OnlineReimbursement_expenseDetailContentTABLE() {
+        // 定位父容器
+        const container = document.getElementById('ctl00_ContentPlaceHolder1_PN_BXNR');
+        if (!container) return;
+        if (document.getElementById('uiFix_expenseDetailContent')) return;
+
+        // 1. 获取容器内【所有层级】的 div
+        const allDivs = container.querySelectorAll('div');
+
+        // 2. 寻找第一个 inline style 明确设定为 600px 的 div
+        // Array.from 是为了让 querySelectorAll 返回的 NodeList 可以使用 find 方法
+        const targetDiv = Array.from(allDivs).find(div => {
+            // 检查 inline style，同时兼容可能有空格的情况（如 "600px " 或 " 600px"）
+            return div.style.height.trim() === '600px';
+        });
+
+        // 3. 如果找到了，执行修改并终止循环/监听
+        if (targetDiv) {
+            targetDiv.style.height = '100%';
+            targetDiv.id = 'uiFix_expenseDetailContent';
+            console.log('已找到div id=ctl00_ContentPlaceHolder1_PN_BXNR 深层级中的第一个 height: 600px 并改为 100%');
+
+            // 任务完成，清除定时器
+            if (window.scutTimer) {
+                clearInterval(window.scutTimer);
+            }
+        }
+    }
 
 
+    //==================== 修复 税票录入 页面绑定发票表格iframe高度问题 ====================================
+    // 初始化修复 税票录入 的iframe高度功能
+    function fixUI_OnlineReimbursement_InvoiceBindingIFRAME() {
+        const targetIframe = document.getElementById('ctl00_ContentPlaceHolder1_fm_wx');
+        if (targetIframe && targetIframe.tagName.toLowerCase() === 'iframe') {
+            const sizeInfo = getIframeSize(targetIframe);
+            const newIframeHeight = sizeInfo.height < 900 ? 900 : sizeInfo.height + 50;
+            //console.log(newIframeHeight+"px");
+            // adj_Iframe_Height(targetIframe, newIframeHeight + "px");
+            targetIframe.style.height = newIframeHeight + "px";
+            console.log("已设置iframe id=" + targetIframe.id + '的height: ' + newIframeHeight + "px");
+        }
+
+    }
 
 
 
@@ -2238,6 +2282,7 @@
             if (tampermonkeyuserConfig.enablefixUI_FinanceQuery_UiMisalignment) {
                 if (currentUrl.includes('202.38.194.48:8182/') || currentUrl.includes('202-38-194-48-8182.webvpn.scut.edu.cn/')) {
                     fixUI_FinanceQuery_UiMisalignment(window_width);
+                    console.log("[fixUI 财务查询]首页表格错位问题 成功在 div_mb 前插入1px高空行");
                 }
             }
 
@@ -2245,6 +2290,7 @@
             if (tampermonkeyuserConfig.enablefixUI_FinanceQuery_TableCannotExpandFully) {
                 if (currentUrl.includes('202.38.194.48:8182/') || currentUrl.includes('202-38-194-48-8182.webvpn.scut.edu.cn/')) {
                     fixUI_FinanceQuery_TableCannotExpandFully();
+                    console.log("[fixUI 财务查询]修正首页表格宽度问题Fixed width restrictions removed for .main and .width classes.");
                 }
             }
 
@@ -2252,8 +2298,27 @@
             if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_ProjectSelectPageTableHeight) {
                 if (getTable('ctl00_ContentPlaceHolder1_div_xmtb')) {
                     fixUI_OnlineReimbursement_ProjectSelectPageTableHeight();
+                    console.log("[fixUI 网上报账]项目选择（经费选择）表格高度样式已改为 auto");
                 }
             }
+
+            //判断是否使能 修正网上报账系统UI-费用明细页面表格高度问题
+            if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_ExpenseDetailPageTableHeight) {
+                if (document.getElementById('ctl00_ContentPlaceHolder1_PN_BXNR')) {
+                    fixUI_OnlineReimbursement_expenseDetailContentTABLE();
+                    console.log("[fixUI 网上报账]费用明细页面表格高度样式已改为 100%");
+                }
+            }
+
+            //判断是否使能 修正网上报账系统UI-税票录入页面绑定发票表格iframe高度问题
+            if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight) {
+                if (document.getElementById('ctl00_ContentPlaceHolder1_fm_wx')) {
+                    fixUI_OnlineReimbursement_InvoiceBindingIFRAME();
+                    console.log("[fixUI 网上报账]-税票录入页面绑定发票表格iframe高度已更改");
+                }
+            }
+
+
 
             // 监听ASP.NET异步回发完成事件
             if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
@@ -2292,7 +2357,23 @@
                     if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_ProjectSelectPageTableHeight) {
                         if (getTable('ctl00_ContentPlaceHolder1_div_xmtb')) {
                             fixUI_OnlineReimbursement_ProjectSelectPageTableHeight();
-                            console.log("[fixUI 网上报账]ASP.NET异步回发完成,项目选择（经费选择）表格高度样式已注入");
+                            console.log("[fixUI 网上报账]ASP.NET异步回发完成,项目选择（经费选择）表格高度样式已改为 auto");
+                        }
+                    }
+
+                    //判断是否使能 修正网上报账系统UI-费用明细页面表格高度问题
+                    if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_ExpenseDetailPageTableHeight) {
+                        if (document.getElementById('ctl00_ContentPlaceHolder1_PN_BXNR')) {
+                            fixUI_OnlineReimbursement_expenseDetailContentTABLE();
+                            console.log("[fixUI 网上报账]ASP.NET异步回发完成,费用明细页面表格高度样式已改为 100%");
+                        }
+                    }
+
+                    //判断是否使能 修正网上报账系统UI-税票录入页面绑定发票表格iframe高度问题
+                    if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight) {
+                        if (document.getElementById('ctl00_ContentPlaceHolder1_fm_wx')) {
+                            fixUI_OnlineReimbursement_InvoiceBindingIFRAME();
+                            console.log("[fixUI 网上报账]-税票录入页面绑定发票表格iframe高度已更改");
                         }
                     }
 
