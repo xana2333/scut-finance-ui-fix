@@ -2,7 +2,7 @@
 // @name         SCUT Finance Helper
 // @name:zh      SCUT财务系统小助手
 // @namespace    https://github.com/xana2333/scut-finance-ui-fix
-// @version      1.0.3
+// @version      1.0.5
 // @description  SCUT网上报账系统 & 财务查询系统辅助小工具：UI修正功能、自动化批量操作，让报账更高效流畅。
 // @author       XANA
 // @homepage     https://github.com/xana2333/scut-finance-ui-fix
@@ -24,7 +24,7 @@
 // @grant        GM_unregisterMenuCommand
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     /** ==== 持久化配置文件相关 ==== **/
@@ -105,7 +105,7 @@
     }
 
     updateMenus();// 初次注册菜单
-    
+
     //========================================================================================================
 
 
@@ -1113,7 +1113,7 @@
 
     /** ==== 构建 UI部分 ==== **/
     /** ==== 创建任务列表面板（包含按钮和折叠区） ==== **/
-    function AutoBindInvoice_createTaskPanel(running=isRunning) {
+    function AutoBindInvoice_createTaskPanel(running = isRunning) {
         if (document.getElementById('AutoBindInvoice_taskPanel')) return;
 
         GM_addStyle(`
@@ -2043,9 +2043,59 @@
         AutoClicker_Logger.log("处理流程结束");
     }
 
+    //========================================================================================================
 
 
+    /** ==== 修正财务查询系统UI-表格无法完全展开问题 ==== **/
+    //处理财务查询系统首页首页经费表格UI太窄不便于操作问题
+    function fixUI_FinanceQuery_TableCannotExpandFully() {
+        // 使用 GM_addStyle 注入自定义CSS规则，解决首页经费表格太宽，但是容器窗口太小的问题。
+        // 这会覆盖 .main 类的 width: 980px;
+        GM_addStyle(`
+        .main {
+            min-width: 980px; /*增加最小宽度（与原来保持一致），避免它过小带来新问题*/
+            width: auto !important; /* 或者可以使用百分比, 如 100%, 但 auto 通常更灵活 */
+            max-width: none !important; /* 移除可能存在的最大宽度限制 */
+            margin-left: auto !important; /* 保持居中或根据需要调整 */
+            margin-right: auto !important; /* 保持居中或根据需要调整 */
+        }
+        `);
+        // 这会覆盖 .width 类的 width: 960px;
+        GM_addStyle(`
+        .width {
+            width: 100% !important; /* 改为占据其容器的100%宽度 */
+            max-width: none !important; /* 移除可能存在的最大宽度限制 */
+        }
+        `);
+        console.log("[fixUI 财务查询]修正首页表格宽度问题Fixed width restrictions removed for .main and .width classes.");
 
+    }
+
+
+    /** ==== 修正财务查询系统UI-首页表格错位问题 ==== **/
+    function fixUI_FinanceQuery_UiMisalignment() {
+        // 在div id=ctl00_ContentPlaceHolder1_probox 与 div_mb之间插入一个1px高的空内容，解决“经费情况”、“我的工资”、“来款信息”行错位问题
+        // 尝试插入，直到成功为止
+        const fixUI_FinanceQuery_insertDiv = setInterval(() => {
+            //检查是否插入过
+            if (document.getElementById('uiFix_financeQuerySYS_layoutSpacer_1px')) {
+                clearInterval(fixUI_FinanceQuery_insertDiv); // 成功后停止检测
+            }
+            // 精确匹配 id 为 div_mb 的元素
+            const target = document.getElementById('div_mb');
+            if (target) {
+                let val = window_width * 0.7;
+                let customWidth = val + "px";
+                const htmlString = '<div class="all_content" id="uiFix_financeQuerySYS_layoutSpacer_1px" style="width:' + customWidth + '; height: 1px;"></div>';
+
+                // 'beforebegin' 表示插入到 target 元素的前面
+                target.insertAdjacentHTML('beforebegin', htmlString);
+
+                console.log("[fixUI 财务查询]首页表格错位问题 成功在 div_mb 前插入了 HTML 代码");
+                clearInterval(fixUI_FinanceQuery_insertDiv); // 成功后停止检测
+            }
+        }, 500);
+    }
 
 
 
@@ -2071,9 +2121,13 @@
      */
     function initialize() {
         try {
+            //获取当前URL
             const currentUrl = window.location.href;
-            console.log("[SCUT Finance Helper]currentUrl", currentUrl)
+            // console.log("[SCUT Finance Helper]currentUrl", currentUrl)
             // console.log("[SCUT Finance Helper]当前配置:", JSON.stringify(tampermonkeyuserConfig, null, 4));
+            // 获取当前窗口的视口宽度（包含滚动条）
+            let window_width = window.innerWidth;
+            console.log("[SCUT Finance Helper]currentUrl" + currentUrl + " 当前宽度为: " + window_width + "px");
 
             //判断是否使能 批量删除发票功能
             if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice) {
@@ -2113,6 +2167,19 @@
                 AutoClicker_Logger.log("自动绑定系统已初始化完成");
             }
 
+            //判断是否使能 修正财务查询系统UI-首页表格错位问题
+            if (tampermonkeyuserConfig.enablefixUI_FinanceQuery_UiMisalignment) {
+                if (currentUrl.includes('202.38.194.48:8182/') || currentUrl.includes('02-38-194-48-8182.webvpn.scut.edu.cn/')) {
+                    fixUI_FinanceQuery_UiMisalignment();
+                }
+            }
+
+            //判断是否使能 修正财务查询系统UI-表格无法完全展开问题
+            if (tampermonkeyuserConfig.enablefixUI_FinanceQuery_TableCannotExpandFully) {
+                if (currentUrl.includes('202.38.194.48:8182/') || currentUrl.includes('02-38-194-48-8182.webvpn.scut.edu.cn/')) {
+                    fixUI_FinanceQuery_TableCannotExpandFully();
+                }
+            }
 
             // 监听ASP.NET异步回发完成事件
             if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
