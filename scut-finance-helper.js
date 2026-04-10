@@ -13,6 +13,10 @@
 // @match        https://wsyy.cw.scut.edu.cn/*
 // @match        http://wsyy-cw.webvpn.scut.edu.cn/*
 // @match        https://wsyy-cw.webvpn.scut.edu.cn/*
+// @match        http://202.38.194.48:8182/*
+// @match        https://202.38.194.48:8182/*
+// @match        http://202-38-194-48-8182.webvpn.scut.edu.cn/*
+// @match        https://202-38-194-48-8182.webvpn.scut.edu.cn/*
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
