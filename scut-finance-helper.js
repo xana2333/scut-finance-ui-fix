@@ -2073,7 +2073,7 @@
 
 
     /** ==== 修正财务查询系统UI-首页表格错位问题 ==== **/
-    function fixUI_FinanceQuery_UiMisalignment() {
+    function fixUI_FinanceQuery_UiMisalignment(window_width) {
         // 在div id=ctl00_ContentPlaceHolder1_probox 与 div_mb之间插入一个1px高的空内容，解决“经费情况”、“我的工资”、“来款信息”行错位问题
         // 尝试插入，直到成功为止
         const fixUI_FinanceQuery_insertDiv = setInterval(() => {
@@ -2127,7 +2127,7 @@
             // console.log("[SCUT Finance Helper]当前配置:", JSON.stringify(tampermonkeyuserConfig, null, 4));
             // 获取当前窗口的视口宽度（包含滚动条）
             let window_width = window.innerWidth;
-            console.log("[SCUT Finance Helper]currentUrl" + currentUrl + " 当前宽度为: " + window_width + "px");
+            console.log("[SCUT Finance Helper]currentUrl " + currentUrl + " 当前宽度为: " + window_width + "px");
 
             //判断是否使能 批量删除发票功能
             if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice) {
@@ -2169,8 +2169,8 @@
 
             //判断是否使能 修正财务查询系统UI-首页表格错位问题
             if (tampermonkeyuserConfig.enablefixUI_FinanceQuery_UiMisalignment) {
-                if (currentUrl.includes('202.38.194.48:8182/') || currentUrl.includes('02-38-194-48-8182.webvpn.scut.edu.cn/')) {
-                    fixUI_FinanceQuery_UiMisalignment();
+                if (currentUrl.includes('202.38.194.48:8182/') || currentUrl.includes('202-38-194-48-8182.webvpn.scut.edu.cn/')) {
+                    fixUI_FinanceQuery_UiMisalignment(window_width);
                 }
             }
 
