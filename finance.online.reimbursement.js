@@ -18,24 +18,24 @@
 
 
 //finance.online.reimbursement
-(function() {
+(function () {
     'use strict';
 
-    // 移除div高度限制的函数
-    function configDivHeightStyle(divElement,newHeight="auto") {
-        // 方法1：直接移除height属性
-        //divElement.style.removeProperty('height');
-        //console.log('已移除div id='+divElement.id+'的height参数');
-        // 方法2：设置为auto（备用方案）
-        divElement.style.height = newHeight;
-        console.log('已设置div id='+divElement.id+'的height: '+newHeight);
-    }
+    // // 移除div高度限制的函数
+    // function configDivHeightStyle(divElement, newHeight = "auto") {
+    //     // 方法1：直接移除height属性
+    //     //divElement.style.removeProperty('height');
+    //     //console.log('已移除div id='+divElement.id+'的height参数');
+    //     // 方法2：设置为auto（备用方案）
+    //     divElement.style.height = newHeight;
+    //     console.log('已设置div id=' + divElement.id + '的height: ' + newHeight);
+    // }
     // 调整iframe高度的函数
-    function adj_Iframe_Height(iframeElement,newHeight="1050px") {
-        // 将iframe高度从900px修改为1050px
-        iframeElement.style.height = newHeight;
-        console.log("已设置iframe id="+iframeElement.id+'的height: '+newHeight);
-    }
+    // function adj_Iframe_Height(iframeElement, newHeight = "1050px") {
+    //     // 将iframe高度从900px修改为1050px
+    //     iframeElement.style.height = newHeight;
+    //     console.log("已设置iframe id=" + iframeElement.id + '的height: ' + newHeight);
+    // }
 
     // 获得iframe对象宽高的函数
     function getIframeSize(iframe) {
@@ -117,10 +117,10 @@
     //======================= 在项目选择（经费选择）页面，当有且仅有1个经费被添加时，自动选择该经费===========================
     //项目选择 经费选择id=ctl00_ContentPlaceHolder1_GV_RCXMXX
     // 监听DOM变化,id=ctl00_ContentPlaceHolder1_GV_RCXMXX
-    const DOM_Observer_ctl00_ContentPlaceHolder1_GV_RCXMXX = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
+    const DOM_Observer_ctl00_ContentPlaceHolder1_GV_RCXMXX = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
             // 检查新增的节点
-            mutation.addedNodes.forEach(function(node) {
+            mutation.addedNodes.forEach(function (node) {
                 if (node.nodeType === 1) {
                     // 元素节点
                     if (node.id === 'ctl00_ContentPlaceHolder1_GV_RCXMXX') {
@@ -160,8 +160,8 @@
             rows.forEach((row, index) => {
                 const cells = row.querySelectorAll('td, th');
                 const cellContents = Array.from(cells).map(cell =>
-                                                           cell.textContent.trim().replace(/\s+/g, ' ')
-                                                          );
+                    cell.textContent.trim().replace(/\s+/g, ' ')
+                );
 
                 //console.log(`第 ${index + 1} 行:`, cellContents);
             });
@@ -186,7 +186,7 @@
 
                                 // 方法1: 直接点击
                                 try {
-                                    checkbox.checked=true;
+                                    checkbox.checked = true;
                                     console.log('复选框已点击');
                                     console.log('验证复选框最终状态:', checkbox.checked);
                                 } catch (error) {
@@ -229,20 +229,25 @@
     // ==================== 修复经费选择表格高度问题 ====================
     //项目选择 经费选择id=ctl00_ContentPlaceHolder1_div_xmtb
     // 监听DOM变化,id=ctl00_ContentPlaceHolder1_div_xmtb
-    const DOM_Observer_ctl00_ContentPlaceHolder1_div_xmtb = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
+    const DOM_Observer_ctl00_ContentPlaceHolder1_div_xmtb = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
             // 检查新增的节点
-            mutation.addedNodes.forEach(function(node) {
+            mutation.addedNodes.forEach(function (node) {
                 if (node.nodeType === 1) {
                     // 元素节点
                     if (node.id === 'ctl00_ContentPlaceHolder1_div_xmtb') {//项目选择 经费选择id
-                        configDivHeightStyle(node);
+                        // configDivHeightStyle(node);
+                        node.style.height = "auto";
+                        console.log('已设置div id=' + node.id + '的height: auto');
+
                     }
 
                     // 如果是容器节点，检查其子节点
                     const targetDiv = node.querySelector('#ctl00_ContentPlaceHolder1_div_xmtb');
                     if (targetDiv) {
-                        configDivHeightStyle(targetDiv);
+                        // configDivHeightStyle(targetDiv);
+                        targetDiv.style.height = "auto";
+                        console.log('已设置div id=' + targetDiv.id + '的height: auto');
                     }
                 }
             });
@@ -253,7 +258,9 @@
         const targetDiv = document.getElementById('ctl00_ContentPlaceHolder1_div_xmtb');
         //如果id=ctl00_ContentPlaceHolder1_div_xmtb存在，直接修改。
         if (targetDiv) {
-            configDivHeightStyle(targetDiv);
+            // configDivHeightStyle(targetDiv);
+            targetDiv.style.height = "auto";
+            console.log('已设置div id=' + targetDiv.id + '的height: auto');
         }
         // 开始监听DOM变化
         DOM_Observer_ctl00_ContentPlaceHolder1_div_xmtb.observe(document.body, {
@@ -268,24 +275,28 @@
     // ==================== 修复 税票录入 的iframe高度 ====================
     //税票录入 id=ctl00_ContentPlaceHolder1_fm_wx
     // 监听iframe相关的DOM变化
-    const DOM_Observer_ctl00_ContentPlaceHolder1_fm_wx = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            mutation.addedNodes.forEach(function(node) {
+    const DOM_Observer_ctl00_ContentPlaceHolder1_fm_wx = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
                 if (node.nodeType === 1) {
                     if (node.id === 'ctl00_ContentPlaceHolder1_fm_wx' && node.tagName.toLowerCase() === 'iframe') {
                         const sizeInfo = getIframeSize(node);
                         const newIframeHeight = sizeInfo.height < 900 ? 900 : sizeInfo.height + 50;
                         //console.log(newIframeHeight+"px");
-                        adj_Iframe_Height(node,newIframeHeight+"px");
+                        // adj_Iframe_Height(node, newIframeHeight + "px");
+                        node.style.height = newIframeHeight + "px";
+                        console.log("已设置iframe id=" + node.id + '的height: ' + newIframeHeight + "px");
                     }
                     // 检查子元素中的iframe
                     const targetIframes = node.querySelectorAll('#ctl00_ContentPlaceHolder1_fm_wx');
-                    targetIframes.forEach(function(iframe) {
+                    targetIframes.forEach(function (iframe) {
                         if (iframe.tagName.toLowerCase() === 'iframe') {
                             const sizeInfo = getIframeSize(iframe);
                             const newIframeHeight = sizeInfo.height < 900 ? 900 : sizeInfo.height + 50;
                             //console.log(newIframeHeight+"px");
-                            adj_Iframe_Height(iframe,newIframeHeight+"px");
+                            // adj_Iframe_Height(iframe, newIframeHeight + "px");
+                            iframe.style.height = newIframeHeight + "px";
+                            console.log("已设置iframe id=" + iframe.id + '的height: ' + newIframeHeight + "px");
                         }
                     });
                 }
@@ -299,7 +310,9 @@
             const sizeInfo = getIframeSize(targetIframe);
             const newIframeHeight = sizeInfo.height < 900 ? 900 : sizeInfo.height + 50;
             //console.log(newIframeHeight+"px");
-            adj_Iframe_Height(targetIframe,newIframeHeight+"px");
+            // adj_Iframe_Height(targetIframe, newIframeHeight + "px");
+            targetIframe.style.height = newIframeHeight + "px";
+            console.log("已设置iframe id=" + targetIframe.id + '的height: ' + newIframeHeight + "px");
         }
         // 开始监听iframe相关的DOM变化
         DOM_Observer_ctl00_ContentPlaceHolder1_fm_wx.observe(document.body, {
