@@ -29,7 +29,7 @@
     };
 
     // 日志工具（来自第一个脚本）
-    const Logger = {
+    const AutoClicker_Logger = {
         log: (...args) => console.log('[AutoClicker]', ...args),
         warn: (...args) => console.warn('[AutoClicker]', ...args),
         error: (...args) => console.error('[AutoClicker]', ...args),
@@ -46,13 +46,13 @@
         // 定位目标行
         const targetRow = document.getElementById('tr_bd');
         if (!targetRow) {
-            Logger.log("未找到 tr_bd 行");
+            AutoClicker_Logger.log("未找到 tr_bd 行");
             return;
         }
 
         // 检查是否已存在空行
         if (document.getElementById('tr_empty_row')) {
-            Logger.log("空行已存在");
+            AutoClicker_Logger.log("空行已存在");
             return;
         }
 
@@ -73,7 +73,7 @@
 
         // 在目标行后插入新行
         targetRow.insertAdjacentElement('afterend', newRow);
-        Logger.log("空白行添加成功");
+        AutoClicker_Logger.log("空白行添加成功");
     }
 
 
@@ -257,7 +257,7 @@
         //     }
         // });
 
-        Logger.log("任务面板已创建");
+        AutoClicker_Logger.log("任务面板已创建");
     }
 
     /**
@@ -269,7 +269,7 @@
         if (btnBind) {
             btnBind.addEventListener('click', async () => {
                 if (!isRunning) {
-                    Logger.log('开始一键绑定流程...');
+                    AutoClicker_Logger.log('开始一键绑定流程...');
                     taskList = [];
                     // setupAutoConfirm(); // 你第一个脚本里的自动确认
                     await AutoBindInvoice_processAutoBoundButtonsSerially(); // 调用你的绑定逻辑
@@ -282,7 +282,7 @@
         if (btnUnbind) {
             btnUnbind.addEventListener('click', async () => {
                 if (!isRunning) {
-                    Logger.log('开始一键解绑流程...');
+                    AutoClicker_Logger.log('开始一键解绑流程...');
                     taskList = [];
                     // setupAutoConfirm();
                     await AutoBindInvoice_processAutoUnoundButtonsSerially(); // 调用你的解绑逻辑
@@ -294,7 +294,7 @@
         const btnStop = document.getElementById('AutoBindInvoice_btnStopTask');
         if (btnStop) {
             btnStop.addEventListener('click', () => {
-                Logger.log('手动停止任务');
+                AutoClicker_Logger.log('手动停止任务');
                 isRunning = false;
             });
         }
@@ -303,7 +303,7 @@
         const btnClear = document.getElementById('AutoBindInvoice_btnClearList');
         if (btnClear) {
             btnClear.addEventListener('click', () => {
-                Logger.log('清空任务列表');
+                AutoClicker_Logger.log('清空任务列表');
                 taskList = [];
                 AutoBindInvoice_updateUiDisplay();
                 document.getElementById('AutoBindInvoice_currentTask').textContent = '当前任务：无';
@@ -342,7 +342,7 @@
         const tbody = document.getElementById('AutoBindInvoice_taskTableBody');
 
         if (!totalTasksEl || !successTasksEl || !pendingTasksEl || !tbody) {
-            Logger.warn('面板 DOM 不完整，无法刷新 UI');
+            AutoClicker_Logger.warn('面板 DOM 不完整，无法刷新 UI');
             return;
         }
 
@@ -381,7 +381,7 @@
     function AutoBindInvoice_updateCurrentTaskInfo(task) {
         const currentTaskEl = document.getElementById('AutoBindInvoice_currentTask');
         if (!currentTaskEl) {
-            Logger.warn('当前任务信息元素不存在');
+            AutoClicker_Logger.warn('当前任务信息元素不存在');
             return;
         }
 
@@ -486,7 +486,7 @@
                 }
 
                 if (Date.now() - startTime >= timeout) {
-                    Logger.warn('等待页面稳定超时');
+                    AutoClicker_Logger.warn('等待页面稳定超时');
                     resolve(false);
                     return;
                 }
@@ -508,7 +508,7 @@
     function getTable(ElementId = 'GV_ZDFPPL') {
         const table = document.getElementById(ElementId);
         if (!table) {
-            Logger.error("未找到 ID 为 " + ElementId + " 的表格。");
+            AutoClicker_Logger.error("未找到 ID 为 " + ElementId + " 的表格。");
         }
         return table;
     }
@@ -520,7 +520,7 @@
     function setupAutoConfirm() {
         const originalConfirm = window.confirm;
         window.confirm = function (message) {
-            Logger.log(`自动确认弹窗: "${message}"`);
+            AutoClicker_Logger.log(`自动确认弹窗: "${message}"`);
             return true; // 自动点击 "确定"
         };
     }
@@ -688,20 +688,20 @@
 
                 if (!button) {
                     // 按钮消失了（成功绑定）
-                    Logger.log(`按钮 ${buttonId} 已消失（成功）`);
+                    AutoClicker_Logger.log(`按钮 ${buttonId} 已消失（成功）`);
                     resolve({ success: true, reason: 'button_disappeared' });
                     return;
                 }
 
                 if (button.disabled || button.value !== '绑定') {
                     // 按钮状态改变了（变灰或文字改变）
-                    Logger.log(`按钮 ${buttonId} 状态已改变`);
+                    AutoClicker_Logger.log(`按钮 ${buttonId} 状态已改变`);
                     resolve({ success: true, reason: 'state_changed' });
                     return;
                 }
 
                 if (Date.now() - startTime >= timeout) {
-                    Logger.log(`按钮 ${buttonId} 等待超时`);
+                    AutoClicker_Logger.log(`按钮 ${buttonId} 等待超时`);
                     resolve({ success: false, reason: 'timeout' });
                     return;
                 }
@@ -723,20 +723,20 @@
 
                 if (!button) {
                     // 按钮消失了（成功绑定）
-                    Logger.log(`按钮 ${buttonId} 已消失（成功）`);
+                    AutoClicker_Logger.log(`按钮 ${buttonId} 已消失（成功）`);
                     resolve({ success: true, reason: 'button_disappeared' });
                     return;
                 }
 
                 if (button.disabled || button.value !== '取消绑定') {
                     // 按钮状态改变了（变灰或文字改变）
-                    Logger.log(`按钮 ${buttonId} 状态已改变`);
+                    AutoClicker_Logger.log(`按钮 ${buttonId} 状态已改变`);
                     resolve({ success: true, reason: 'state_changed' });
                     return;
                 }
 
                 if (Date.now() - startTime >= timeout) {
-                    Logger.log(`按钮 ${buttonId} 等待超时`);
+                    AutoClicker_Logger.log(`按钮 ${buttonId} 等待超时`);
                     resolve({ success: false, reason: 'timeout' });
                     return;
                 }
@@ -758,22 +758,22 @@
             const currentButton = document.getElementById(button.id);
 
             if (!currentButton || currentButton.disabled || currentButton.value !== '绑定') {
-                Logger.log(`按钮 ${button.id} 不再可用`);
+                AutoClicker_Logger.log(`按钮 ${button.id} 不再可用`);
                 return { success: false, reason: 'button_unavailable' };
             }
 
             // 使用postback
             if (typeof (__doPostBack) !== 'undefined' && currentButton.name) {
-                Logger.log(`触发 postback: ${currentButton.name}`);
+                AutoClicker_Logger.log(`触发 postback: ${currentButton.name}`);
                 __doPostBack(currentButton.name, '');
             } else {
-                Logger.log(`直接点击按钮: ${currentButton.id}`);
+                AutoClicker_Logger.log(`直接点击按钮: ${currentButton.id}`);
                 currentButton.click();
             }
 
             return { success: true };
         } catch (error) {
-            Logger.error(`点击按钮${button.id}失败:`, error);
+            AutoClicker_Logger.error(`点击按钮${button.id}失败:`, error);
             return { success: false, reason: 'click_failed' };
         }
     }
@@ -786,22 +786,22 @@
             const currentButton = document.getElementById(button.id);
 
             if (!currentButton || currentButton.disabled || currentButton.value !== '取消绑定') {
-                Logger.log(`按钮 ${button.id} 不再可用`);
+                AutoClicker_Logger.log(`按钮 ${button.id} 不再可用`);
                 return { success: false, reason: 'button_unavailable' };
             }
 
             // 使用postback
             if (typeof (__doPostBack) !== 'undefined' && currentButton.name) {
-                Logger.log(`触发 postback: ${currentButton.name}`);
+                AutoClicker_Logger.log(`触发 postback: ${currentButton.name}`);
                 __doPostBack(currentButton.name, '');
             } else {
-                Logger.log(`直接点击按钮: ${currentButton.id}`);
+                AutoClicker_Logger.log(`直接点击按钮: ${currentButton.id}`);
                 currentButton.click();
             }
 
             return { success: true };
         } catch (error) {
-            Logger.error(`点击按钮${button.id}失败:`, error);
+            AutoClicker_Logger.error(`点击按钮${button.id}失败:`, error);
             return { success: false, reason: 'click_failed' };
         }
     }
@@ -812,14 +812,14 @@
         AutoBindInvoice_toggleButtonState(isRunning);
         taskList = AutoBindInvoice_scanTableAndCreateBoundTasks(); //此处返回的是list，内部obj定义见AutoBindInvoice_scanTableAndCreateBoundTasks函数
         AutoBindInvoice_updateUiDisplay();
-        Logger.log("开始串行处理流程...");
-        // Logger.log(`[一键绑定]taskList:`);
-        // Logger.log(taskList);
+        AutoClicker_Logger.log("开始串行处理流程...");
+        // AutoClicker_Logger.log(`[一键绑定]taskList:`);
+        // AutoClicker_Logger.log(taskList);
 
         while (isRunning) {
             const table = getTable('GV_ZDFPPL');
             if (!table) {
-                Logger.error("找不到表格，退出处理");
+                AutoClicker_Logger.error("找不到表格，退出处理");
                 break;
             }
 
@@ -849,11 +849,11 @@
             }
 
             const workList = findSharedInvoices(taskList, nowList); //只操作taskList里有的按钮
-            // Logger.log(`[一键绑定]workList:`);
-            // Logger.log(workList);
+            // AutoClicker_Logger.log(`[一键绑定]workList:`);
+            // AutoClicker_Logger.log(workList);
 
             if (workList.length === 0) {
-                Logger.log("所有按钮已处理完毕！");
+                AutoClicker_Logger.log("所有按钮已处理完毕！");
                 // updateStatus('已完成', `总数量: ${workList.length}`);
                 isRunning = false;
                 break;
@@ -874,7 +874,7 @@
                 AutoBindInvoice_updateCurrentTaskInfo(task);
             }
 
-            Logger.log(`准备处理按钮: ${buttonId} (${workList.length} 个剩余)`);
+            AutoClicker_Logger.log(`准备处理按钮: ${buttonId} (${workList.length} 个剩余)`);
 
             try {
                 // 等待页面稳定
@@ -887,7 +887,7 @@
                 const clickResult = await AutoBindInvoice_safeClickBoundButton(firstButton);
 
                 if (!clickResult.success) {
-                    Logger.warn(`按钮 ${buttonId} 点击失败: ${clickResult.reason}`);
+                    AutoClicker_Logger.warn(`按钮 ${buttonId} 点击失败: ${clickResult.reason}`);
 
                     if (clickResult.reason === 'stopped') {
                         break;
@@ -909,7 +909,7 @@
 
                 // 等待按钮状态变化
                 const result = await AutoBindInvoice_waitForBoundButtonStateChange(buttonId);
-                Logger.log(`按钮 ${buttonId} 处理结果:`, result);
+                AutoClicker_Logger.log(`按钮 ${buttonId} 处理结果:`, result);
 
                 // 更新任务状态
                 if (task) {
@@ -931,7 +931,7 @@
 
                 if (!isRunning) break;
             } catch (error) {
-                Logger.error(`处理按钮 ${buttonId} 时出错:`, error);
+                AutoClicker_Logger.error(`处理按钮 ${buttonId} 时出错:`, error);
 
                 // 更新任务状态
                 if (task) {
@@ -956,7 +956,7 @@
         //     updateStatus('已完成');
         // }
 
-        Logger.log("处理流程结束");
+        AutoClicker_Logger.log("处理流程结束");
     }
 
     // 串行处理函数 一键取消绑定 功能
@@ -965,14 +965,14 @@
         AutoBindInvoice_toggleButtonState(isRunning);
         taskList = AutoBindInvoice_scanTableAndCreateUnboundTasks(); //此处返回的是list，内部obj定义见AutoBindInvoice_scanTableAndCreateUnboundTasks函数
         AutoBindInvoice_updateUiDisplay();
-        Logger.log("开始串行处理流程...");
-        //Logger.log(`[一键取消绑定]taskList:`);
-        //Logger.log(taskList);
+        AutoClicker_Logger.log("开始串行处理流程...");
+        //AutoClicker_Logger.log(`[一键取消绑定]taskList:`);
+        //AutoClicker_Logger.log(taskList);
 
         while (isRunning) {
             const table = getTable('GV_ZDFPPL');
             if (!table) {
-                Logger.error("找不到表格，退出处理");
+                AutoClicker_Logger.error("找不到表格，退出处理");
                 break;
             }
 
@@ -1002,11 +1002,11 @@
             }
 
             const workList = findSharedInvoices(taskList, nowList); //只操作taskList里有的按钮
-            // Logger.log(`[一键取消绑定]workList:`);
-            // Logger.log(workList);
+            // AutoClicker_Logger.log(`[一键取消绑定]workList:`);
+            // AutoClicker_Logger.log(workList);
 
             if (workList.length === 0) {
-                Logger.log("所有按钮已处理完毕！");
+                AutoClicker_Logger.log("所有按钮已处理完毕！");
                 // updateStatus('已完成', `总数量: ${workList.length}`);
                 isRunning = false;
                 break;
@@ -1027,7 +1027,7 @@
                 AutoBindInvoice_updateCurrentTaskInfo(task);
             }
 
-            Logger.log(`准备处理按钮: ${buttonId} (${workList.length} 个剩余)`);
+            AutoClicker_Logger.log(`准备处理按钮: ${buttonId} (${workList.length} 个剩余)`);
 
             try {
                 // 等待页面稳定
@@ -1040,7 +1040,7 @@
                 const clickResult = await AutoBindInvoice_safeClickUnoundButton(firstButton);
 
                 if (!clickResult.success) {
-                    Logger.warn(`按钮 ${buttonId} 点击失败: ${clickResult.reason}`);
+                    AutoClicker_Logger.warn(`按钮 ${buttonId} 点击失败: ${clickResult.reason}`);
 
                     if (clickResult.reason === 'stopped') {
                         break;
@@ -1062,7 +1062,7 @@
 
                 // 等待按钮状态变化
                 const result = await AutoBindInvoice_waitForUnboundButtonStateChange(buttonId);
-                Logger.log(`按钮 ${buttonId} 处理结果:`, result);
+                AutoClicker_Logger.log(`按钮 ${buttonId} 处理结果:`, result);
 
                 // 更新任务状态
                 if (task) {
@@ -1084,7 +1084,7 @@
 
                 if (!isRunning) break;
             } catch (error) {
-                Logger.error(`处理按钮 ${buttonId} 时出错:`, error);
+                AutoClicker_Logger.error(`处理按钮 ${buttonId} 时出错:`, error);
 
                 // 更新任务状态
                 if (task) {
@@ -1109,7 +1109,7 @@
         //     updateStatus('已完成');
         // }
 
-        Logger.log("处理流程结束");
+        AutoClicker_Logger.log("处理流程结束");
     }
 
 
@@ -1130,17 +1130,17 @@
                 prm.add_endRequest(function (sender, args) {
                     // 重新绑定事件
                     //bindControlEvents();
-                    //Logger.log("ASP.NET异步回发完成，重新绑定事件");
+                    //AutoClicker_Logger.log("ASP.NET异步回发完成，重新绑定事件");
                     
                     //在<tr id="tr_bd">后插入空行
                     AutoBindInvoice_addEmptyRowAfterTrBd();
-                    Logger.log("ASP.NET异步回发完成，重新插入空行");
+                    AutoClicker_Logger.log("ASP.NET异步回发完成，重新插入空行");
                 });
             }
 
-            Logger.log("自动绑定系统已初始化完成");
+            AutoClicker_Logger.log("自动绑定系统已初始化完成");
         } catch (error) {
-            Logger.error("初始化失败:", error);
+            AutoClicker_Logger.error("初始化失败:", error);
         }
     }
 
