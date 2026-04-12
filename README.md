@@ -27,7 +27,7 @@ https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4/ii
 ### 添加js脚本
 点击按钮一键安装脚本
 
-[![安装到 Tampermonkey](https://img.shields.io/badge/Install-Tampermonkey-blue?logo=Tampermonkey)](https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/main/scut-finance-helper.js)
+[![安装到 Tampermonkey](https://img.shields.io/badge/Install-Tampermonkey-blue?logo=Tampermonkey)](https://www.tampermonkey.net/script_installation.php#url=https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/main/scut-finance-helper.user.js)
 
 
 
