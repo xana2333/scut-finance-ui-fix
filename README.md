@@ -1,5 +1,5 @@
 # 华南理工大学财务系统UI小助手
-本小助手用于解决网上报账系统、财务查询系统的UI错位和缺少执行批量动作功能的问题。
+本小助手用于解决网上报账系统、财务查询系统的UI错位和缺少批量执行动作的问题。
 
 小助手通过浏览器扩展（插件）tampermonkey（油猴）实现对用户端网页进行UI调整和功能补充，不会也无法修改服务器端数据，不涉及修改用户输入数据。仅为用户提供便利。
 
@@ -14,6 +14,7 @@
 #### 使用前
 默认情况下，我的票夹页面中缺少批量删除功能。
 ![alt text](imgs/feature-screenshots/1.1.png)
+
 #### 使用后
 添加批量删除选中发票功能，这样就不用一个个点删除了
 ![alt text](imgs/feature-screenshots/1.2.png)
@@ -22,16 +23,19 @@
 #### 使用前
 默认情况下，税票录入（绑定发票）页面中缺少批量绑定发票功能。
 ![alt text](imgs/feature-screenshots/2.1.png)
+
 #### 使用后
-添加批量绑定、批量解绑当前页面的发票功能，这样就不用一个个点绑定了
+添加批量绑定、批量解绑当前页面**所有**的发票功能，这样就不用一个个单独点绑定了
 ![alt text](imgs/feature-screenshots/2.2.png)
 
 ### 3.网上报账系统-自动选中日常报销中已添加经费
 #### 使用前
-默认情况下，在日常报销中编辑一个已经部分录入的单据，它不好自动选择唯一的经费，还要多点一下
+默认情况下，在日常报销中编辑一个已经部分录入的单据，它不会自动选择唯一的经费，还要多点一下
 ![alt text](imgs/feature-screenshots/3.1.png)
+
 #### 使用后
 有且仅有1个已录入经费时候，脚本会帮你自动选择经费。
+
 有多个经费的时候，不会自动选择。
 ![alt text](imgs/feature-screenshots/3.2.png)
 
@@ -46,6 +50,7 @@
 #### 使用前
 默认情况下，在日常报销中填写费用明细页面，存在2个垂直方向的滑动条，导致操作困难。
 ![alt text](imgs/feature-screenshots/5.1.png)
+
 #### 使用后
 将费用明细表格高度修正，减少1个滑动条。
 ![alt text](imgs/feature-screenshots/5.2.png)
@@ -55,19 +60,26 @@
 #### 使用前
 默认情况下，在税票录入（绑定发票）页面中，存在2个垂直方向的滑动条，导致操作困难。
 ![alt text](imgs/feature-screenshots/6.1.png)
+
 #### 使用后
 将绑定发票页面高度修正，减少1个滑动条。
 
 
 ### 7.财务查询系统UI修正-首页表格错位问题
 #### 使用前
+由于现代显示器分辨率都比较大，默认情况下，UI会有严重错位问题。
+![alt text](imgs/feature-screenshots/7.1.png)
 
 #### 使用后
+通过插入一个1px高的空行，解决错位问题。修复后如下图
+![alt text](imgs/feature-screenshots/7.2.png)
 
 ### 9.财务查询系统UI修正-表格无法完全展开问题
 #### 使用前
+默认情况下，由于表格比较宽，当经常难以完整显示右侧所有按钮，操作非常不便。
 
 #### 使用后
+通过移除表格宽度限制，使得按钮均能正常显示
 
 
 
@@ -95,7 +107,7 @@ https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4/ii
 [![安装到 Tampermonkey](https://img.shields.io/badge/Install-Tampermonkey-blue?logo=Tampermonkey)](https://www.tampermonkey.net/script_installation.php#url=https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/main/scut-finance-helper.user.js)
 
 ### 启用各个功能 默认情况下所有功能均为**禁用**
-大家可以按需启用各个功能，默认情况下各个功能均为禁用（⛔）。
+大家可以按需启用各个功能，默认情况下各个功能均为**禁用**（⛔）。
 点击需要的功能后，会转化为启用（✅）
 
 ![alt text](imgs/install/3.1.png)
