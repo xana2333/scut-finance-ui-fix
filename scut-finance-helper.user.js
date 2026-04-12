@@ -1070,7 +1070,7 @@
                     win.location.href.includes("/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
                     console.log("[hookWindow]我的票夹页面[删除发票]动作收到回调-删除成功");
                     return true;
-                }else {
+                } else {
                     //其余消息放行
                     console.log("[hookWindow]调用原版Alert URL:", win.location.href, ", message:", message);
                     originalAlert(message);
@@ -1098,7 +1098,7 @@
                     win.location.href.includes("/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
                     console.log("[hookWindow]我的票夹页面 自动确认删除发票对话框");
                     return true;
-                }else {
+                } else {
                     //其余消息放行
                     console.log("[hookWindow]调用原版Confirm URL:", win.location.href, ", message:", message);
                     return originalConfirm(message);
@@ -1241,7 +1241,7 @@
         // let targetDoc = window.top.frames['mainframe']?.document || window.top.document;
         let targetDoc = document;
 
-        console.log("window.top.frames[mainframe]",window.top.frames['mainframe']);
+        console.log("window.top.frames[mainframe]", window.top.frames['mainframe']);
         // 在 frame 内运行的 JS
         console.log("fixUI_PopupUI_initContainerAndCSS window.frameElement", window.frameElement);    // <frame name="mainframe" src="frame_main.aspx">
         console.log("fixUI_PopupUI_initContainerAndCSS window.frameElement.src", window.frameElement.src); // "https://example.com/frame_main.aspx"
@@ -2520,8 +2520,9 @@
 
     //==================== 修复 税票录入 页面绑定发票表格iframe高度问题 ====================================
     // 初始化修复 税票录入 的iframe高度功能
-    function fixUI_OnlineReimbursement_InvoiceBindingIFRAME() {
-        const targetIframe = document.getElementById('ctl00_ContentPlaceHolder1_fm_wx');
+    function fixUI_OnlineReimbursement_InvoiceBindingIFRAME(target) {
+        const targetIframe = target || document.getElementById('ctl00_ContentPlaceHolder1_fm_wx');
+
         if (targetIframe && targetIframe.tagName.toLowerCase() === 'iframe') {
             const sizeInfo = getIframeSize(targetIframe);
             console.log("iframe id=" + targetIframe.id + '的height: ' + sizeInfo.height + "px");
@@ -2530,10 +2531,11 @@
             //console.log(newIframeHeight+"px");
             // adj_Iframe_Height(targetIframe, newIframeHeight + "px");
             targetIframe.height = newIframeHeight + "px";
-            console.log("已设置iframe id=" + targetIframe.id + '的height: ' + newIframeHeight + "px");
+            console.log("已设置iframe id=", targetIframe.id, '的height: ', newIframeHeight, "px");
         }
 
     }
+    
 
 
     //==================== 网上报账系统-自动选中日常报销中已添加经费 ====================================
@@ -2727,7 +2729,13 @@
             if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight) {
                 if (document.getElementById('ctl00_ContentPlaceHolder1_fm_wx')) {
                     fixUI_OnlineReimbursement_InvoiceBindingIFRAME();
-                    console.log("[fixUI 网上报账]税票录入页面绑定发票表格iframe高度已更改");
+                    console.log("[fixUI 网上报账]税票录入页面绑定发票表格iframe高度已更改 0s");
+                    setTimeout(() => {
+                        fixUI_OnlineReimbursement_InvoiceBindingIFRAME();
+                        console.log("[fixUI 网上报账]税票录入页面绑定发票表格iframe高度已更改 1s");
+                    }, 1000);
+                    
+
                 }
             }
 
@@ -2787,14 +2795,6 @@
                         if (document.getElementById('ctl00_ContentPlaceHolder1_PN_BXNR')) {
                             fixUI_OnlineReimbursement_expenseDetailContentTABLE();
                             console.log("[fixUI 网上报账]ASP.NET异步回发完成,费用明细页面表格高度样式已改为 100%");
-                        }
-                    }
-
-                    //判断是否使能 修正网上报账系统UI-税票录入页面绑定发票表格iframe高度问题
-                    if (tampermonkeyuserConfig.enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight) {
-                        if (document.getElementById('ctl00_ContentPlaceHolder1_fm_wx')) {
-                            fixUI_OnlineReimbursement_InvoiceBindingIFRAME();
-                            console.log("[fixUI 网上报账]-税票录入页面绑定发票表格iframe高度已更改");
                         }
                     }
 
