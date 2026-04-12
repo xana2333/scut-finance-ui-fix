@@ -87,13 +87,14 @@
 通过插入一个1px高的空行，解决错位问题。修复后如下图
 ![alt text](imgs/feature-screenshots/7.2.png)
 
-### 9.财务查询系统UI修正-表格无法完全展开问题
+### 8.财务查询系统UI修正-表格无法完全展开问题
 #### 使用前
 默认情况下，由于表格比较宽，当经常难以完整显示右侧所有按钮，操作非常不便。
+![alt text](imgs/feature-screenshots/8.1.png)
 
 #### 使用后
-通过移除表格宽度限制，使得按钮均能正常显示
-
+通过移除表格宽度限制，使得按钮均能正常显示。
+![alt text](imgs/feature-screenshots/8.2.png)
 
 
 
