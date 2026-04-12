@@ -2524,10 +2524,10 @@
         const targetIframe = document.getElementById('ctl00_ContentPlaceHolder1_fm_wx');
         if (targetIframe && targetIframe.tagName.toLowerCase() === 'iframe') {
             const sizeInfo = getIframeSize(targetIframe);
-            const newIframeHeight = sizeInfo.height < 900 ? 900 : sizeInfo.height + 50;
+            const newIframeHeight = sizeInfo.height < 901 ? 950 : sizeInfo.height + 50;
             //console.log(newIframeHeight+"px");
             // adj_Iframe_Height(targetIframe, newIframeHeight + "px");
-            targetIframe.style.height = newIframeHeight + "px";
+            targetIframe.height = newIframeHeight + "px";
             console.log("已设置iframe id=" + targetIframe.id + '的height: ' + newIframeHeight + "px");
         }
 
