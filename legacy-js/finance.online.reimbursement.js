@@ -240,7 +240,7 @@
                     if (node.id === 'ctl00_ContentPlaceHolder1_div_xmtb') {//项目选择 经费选择id
                         // configDivHeightStyle(node);
                         node.style.height = "auto";
-                        console.log('已设置div id=' + node.id + '的height: auto');
+                        console.log('元素节点 已设置div id=' + node.id + '的height: auto');
 
                     }
 
@@ -249,7 +249,7 @@
                     if (targetDiv) {
                         // configDivHeightStyle(targetDiv);
                         targetDiv.style.height = "auto";
-                        console.log('已设置div id=' + targetDiv.id + '的height: auto');
+                        console.log('其子节点 已设置div id=' + targetDiv.id + '的height: auto');
                     }
                 }
             });
@@ -262,7 +262,7 @@
         if (targetDiv) {
             // configDivHeightStyle(targetDiv);
             targetDiv.style.height = "auto";
-            console.log('已设置div id=' + targetDiv.id + '的height: auto');
+            console.log('初始化 已设置div id=' + targetDiv.id + '的height: auto');
         }
         // 开始监听DOM变化
         DOM_Observer_ctl00_ContentPlaceHolder1_div_xmtb.observe(document.body, {
