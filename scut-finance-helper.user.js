@@ -7,8 +7,8 @@
 // @author       XANA
 // @homepage     https://github.com/xana2333/scut-finance-ui-fix
 // @supportURL   https://github.com/xana2333/scut-finance-ui-fix
-// @updateURL    https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/scut-finance-helper.js
-// @downloadURL  https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/refs/heads/main/scut-finance-helper.js
+// @updateURL    https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/main/scut-finance-helper.js
+// @downloadURL  https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/main/scut-finance-helper.js
 // @match        http://wsyy.cw.scut.edu.cn/*
 // @match        https://wsyy.cw.scut.edu.cn/*
 // @match        http://wsyy-cw.webvpn.scut.edu.cn/*
