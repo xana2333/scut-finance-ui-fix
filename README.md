@@ -11,6 +11,10 @@
 
 由于本人前端水平不佳，欢迎各位大佬提交issue和pull request，进一步丰富功能。
 
+已在webvpn和校内环境测试过，如果遇到问题，欢迎提issue。
+
+如果本工具有幸被财务处李老师看到和接受，非常希望可以修改系统的css样式和增加功能按钮，让大家使用得更便利。
+
 [➡ 点击这里查看安装使用方法](#安装使用方法)
 
 [![安装到 Tampermonkey](https://img.shields.io/badge/Install-安装小助手-blue?logo=Tampermonkey)](https://www.tampermonkey.net/script_installation.php#url=https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/main/scut-finance-helper.user.js)
@@ -29,6 +33,7 @@
 添加批量删除选中发票功能，这样就不用一个个点删除了
 ![alt text](imgs/feature-screenshots/1.2.png)
 
+
 ### 2.网上报账系统-批量绑定/取消绑定发票功能
 #### 使用前
 默认情况下，税票录入（绑定发票）页面中缺少批量绑定发票功能。
@@ -39,6 +44,7 @@
 
 仅限按下按钮时刻当前页面的发票。它在运行时会构建个列表，用来储存待绑定/解绑的发票信息，具体可以通过展开列表查看。
 ![alt text](imgs/feature-screenshots/2.2.png)
+
 
 ### 3.网上报账系统-自动选中日常报销中已添加经费
 #### 使用前
@@ -51,12 +57,15 @@
 有多个经费的时候，不会自动选择。
 ![alt text](imgs/feature-screenshots/3.2.png)
 
+
 ### 4.网上报账系统UI修正-日常报销-项目选择（经费选择）页面表格高度问题
 #### 使用前
 由于许多老师有多个经费项目，默认情况下，日常报销的经费选择表格会很长。但是窗口很小，不便于操作。
+![alt text](imgs/feature-screenshots/4.1.png)
 
 #### 使用后
-将经费选择表格高度修正，减少滑动条。
+将经费选择表格高度修正，最大化利用窗口空间，便于找到经费。
+![alt text](imgs/feature-screenshots/4.2.png)
 
 
 ### 5.网上报账系统UI修正-日常报销-费用明细页面表格高度问题
@@ -75,8 +84,8 @@
 ![alt text](imgs/feature-screenshots/6.1.png)
 
 #### 使用后
-将绑定发票页面高度修正，减少1个滑动条。
-
+将绑定发票页面的税票校验iframe高度修正，减少1个滑动条。
+![alt text](imgs/feature-screenshots/6.2.png)
 
 ### 7.财务查询系统UI修正-首页表格错位问题
 #### 使用前
@@ -86,6 +95,7 @@
 #### 使用后
 通过插入一个1px高的空行，解决错位问题。修复后如下图
 ![alt text](imgs/feature-screenshots/7.2.png)
+
 
 ### 8.财务查询系统UI修正-表格无法完全展开问题
 #### 使用前
