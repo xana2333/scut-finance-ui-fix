@@ -2652,11 +2652,11 @@
             // }
 
 
-            fixUI_PopupUI_showAlert("showAlert info 45333333333333333333333333333333333333333333333333333333333366123info", "info", 2000000);
+            // fixUI_PopupUI_showAlert("showAlert info 45333333333333333333333333333333333333333333333333333333333366123info", "info", 2000000);
             // fixUI_PopupUI_showAlert("123success", "success", 2000000);
             // fixUI_PopupUI_showAlert("123warning", "warning", 2000000);
             // fixUI_PopupUI_showAlert("123error", "error", 2000000);
-            fixUI_PopupUI_showConfirm("showConfirm 45333333333333333333333333333333333333333333333333333333333333333366");
+            // fixUI_PopupUI_showConfirm("showConfirm 45333333333333333333333333333333333333333333333333333333333333333366");
 
 
             //判断是否使能 批量删除发票功能
