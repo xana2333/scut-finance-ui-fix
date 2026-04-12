@@ -1,9 +1,9 @@
 # 华南理工大学财务系统UI小助手
 本小助手用于解决网上报账系统、财务查询系统的UI错位和缺少执行批量动作功能的问题。
 
-小助手通过浏览器扩展（插件）tampermonkey（油猴）实现对网页进行功能补充，不涉及修改用户输入数据。仅为用户提供便利。
+小助手通过浏览器扩展（插件）tampermonkey（油猴）实现对用户端网页进行UI调整和功能补充，不会也无法修改服务器端数据，不涉及修改用户输入数据。仅为用户提供便利。
 
-小助手完全开源，大家可以自由修改，代码详见：scut-finance-helper.js
+小助手完全开源，大家可以自由修改，代码详见：scut-finance-helper.user.js
 
 使用本小助手前，请认真阅读源代码，并了解其含义。代码主要由GPT编写，如因使用小助手造成问题，由用户自行负责。
 
@@ -29,7 +29,7 @@ https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4/ii
 
 [![安装到 Tampermonkey](https://img.shields.io/badge/Install-Tampermonkey-blue?logo=Tampermonkey)](https://www.tampermonkey.net/script_installation.php#url=https://raw.githubusercontent.com/xana2333/scut-finance-ui-fix/main/scut-finance-helper.user.js)
 
-
+### 启用各个功能 默认情况下所有功能均为**禁用**
 
 
 ## UI小助手主要功能：
