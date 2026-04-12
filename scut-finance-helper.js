@@ -2,7 +2,7 @@
 // @name         SCUT Finance Helper
 // @name:zh      SCUT财务系统小助手
 // @namespace    https://github.com/xana2333/scut-finance-ui-fix
-// @version      1.0.10
+// @version      1.0.11
 // @description  SCUT网上报账系统 & 财务查询系统辅助小工具：UI修正功能、自动化批量操作，让报账更高效流畅。
 // @author       XANA
 // @homepage     https://github.com/xana2333/scut-finance-ui-fix
@@ -30,7 +30,7 @@
     /** ==== 持久化配置文件相关 ==== **/
     const CONFIG_KEY = 'tampermonkeyuserConfig';
     const defaultConfig = {
-        enable_OnlineReimbursement_OverridePopup: false,                              // 网上报账系统-覆写弹窗功能(跳过弹窗)
+        enable_OnlineReimbursement_OverridePopup: true,                              // 网上报账系统-覆写弹窗功能(跳过弹窗)
 
         enableAuto_OnlineReimbursement_BatchDeleteInvoice: true,                     // 网上报账系统-批量删除发票功能
         enableAuto_OnlineReimbursement_BatchInvoiceBindingToggle: true,              // 网上报账系统-批量绑定/取消绑定发票功能
@@ -1065,21 +1065,26 @@
                 // debugger;
 
                 //只在启用批量删除发票功能时替换指定消息的弹窗
-                if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice && 
+                if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice &&
                     message === "删除成功！" &&
                     win.location.href.includes("/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
                     console.log("[hookWindow]我的票夹页面[删除发票]动作收到回调-删除成功");
                     return true;
-                }
-
-                //使能 覆写弹窗功能(跳过弹窗)
-                if (tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup) {
-                    console.log("[hookWindow]覆写Alert URL:",win.location.href,", message:",message);
-                    fixUI_PopupUI_showAlert(message);
-                } else {
+                }else {
                     //其余消息放行
+                    console.log("[hookWindow]调用原版Alert URL:", win.location.href, ", message:", message);
                     originalAlert(message);
                 }
+
+                // //使能 覆写弹窗功能(跳过弹窗)
+                // if (tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup) {
+                //     console.log("[hookWindow]覆写Alert URL:", win.location.href, ", message:", message);
+                //     fixUI_PopupUI_showAlert(message);
+                // } else {
+                //     //其余消息放行
+                //     console.log("[hookWindow]调用原版Alert URL:", win.location.href, ", message:", message);
+                //     originalAlert(message);
+                // }
             };
 
             const originalConfirm = win.confirm;
@@ -1088,20 +1093,26 @@
                 // debugger;
 
                 //只在启用批量删除发票功能时替换指定消息的弹窗
-                if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice && 
+                if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice &&
                     message === "注意：删除后如果再需要用这张票的话，需要重新上传查验，您确定要删除吗？" &&
                     win.location.href.includes("/hnlgwsyy60/Modules/WDPJ/WDPJ0.aspx")) {
                     console.log("[hookWindow]我的票夹页面 自动确认删除发票对话框");
                     return true;
-                } 
-
-                //使能 覆写弹窗功能(跳过弹窗)
-                if (tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup) {
-                    return fixUI_PopupUI_showConfirm(message);
-                } else {
+                }else {
                     //其余消息放行
+                    console.log("[hookWindow]调用原版Confirm URL:", win.location.href, ", message:", message);
                     return originalConfirm(message);
                 }
+
+                // //使能 覆写弹窗功能(跳过弹窗)
+                // if (tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup) {
+                //     console.log("[hookWindow]覆写Confirm URL:", win.location.href, ", message:", message);
+                //     return fixUI_PopupUI_showConfirm(message);
+                // } else {
+                //     //其余消息放行
+                //     console.log("[hookWindow]调用原版Confirm URL:", win.location.href, ", message:", message);
+                //     return originalConfirm(message);
+                // }
                 //return true;
             };
 
@@ -1131,9 +1142,12 @@
 
     //创建弹出窗口的容器
     function fixUI_PopupUI_ensureContainer() {
-        let container = document.getElementById('fixUI_PopupUI_container');
+        // let topDoc = window.top.document;
+        let mainFrameDoc = window.top.frames['mainframe'].document;
+
+        let container = mainFrameDoc.getElementById('fixUI_PopupUI_container');
         if (!container) {
-            container = document.createElement('div');
+            container = mainFrameDoc.createElement('div');
             container.id = 'fixUI_PopupUI_container';
             Object.assign(container.style, {
                 position: 'fixed',
@@ -1145,7 +1159,7 @@
                 gap: '10px',
                 zIndex: 99999
             });
-            document.body.appendChild(container);
+            mainFrameDoc.body.appendChild(container);
         }
         return container;
     }
@@ -1221,6 +1235,116 @@
         document.head.appendChild(styleEl);
     }
 
+    //创建弹出窗口的容器和css
+    function fixUI_PopupUI_initContainerAndCSS() {
+        // 找到目标 document
+        // let targetDoc = window.top.frames['mainframe']?.document || window.top.document;
+        let targetDoc = document;
+
+        console.log("window.top.frames[mainframe]",window.top.frames['mainframe']);
+        // 在 frame 内运行的 JS
+        console.log("fixUI_PopupUI_initContainerAndCSS window.frameElement", window.frameElement);    // <frame name="mainframe" src="frame_main.aspx">
+        console.log("fixUI_PopupUI_initContainerAndCSS window.frameElement.src", window.frameElement.src); // "https://example.com/frame_main.aspx"
+        // console.log("window.top.frames[mainframe]",window.top.frames['mainframe']);
+
+        // debugger
+
+        if (window.frameElement.src.includes("/hnlgwsyy60/frame_main.aspx")) {
+            // console.log("has!!!")
+
+        }
+        // 样式
+        if (!targetDoc.getElementById('fixUI_PopupUI_styles')) {
+            const styleEl = targetDoc.createElement('style');
+            styleEl.id = 'fixUI_PopupUI_styles';
+            styleEl.textContent = `
+            .fixUI_PopupUI_box{
+                padding: 10px 20px;
+                border-radius: 5px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                opacity:1;
+                transition: opacity 0.5s, transform 0.3s;
+                pointer-events:auto;
+                font-size:14px;
+                display:flex;
+                flex-direction: column;      /* 改成纵向排列，文本和按钮分行 */
+                align-items: center;         /* 元素居中 */
+                color:#fff;
+                max-width: 400px;            /* 最大宽度 */
+                word-break: break-word;      /* 自动换行 */
+                white-space: normal;
+            }
+            .fixUI_PopupUI_fadeout{
+                opacity:0;
+                transform:translateX(50px);
+            }
+            .fixUI_PopupUI_success {background-color: rgba(40, 167, 69, 0.9);}
+            .fixUI_PopupUI_info    {background-color: rgba(33, 150, 243, 0.9);}
+            .fixUI_PopupUI_warning {background-color: rgba(255, 193, 7, 0.9); color: #000;}
+            .fixUI_PopupUI_error   {background-color: rgba(220, 53, 69, 0.9);}
+            /* Alert 内部容器（左右排列：左文字 + 右按钮） */
+            .alertContentContainer{
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            /* 红色关闭按钮（右列） */
+            .alertCloseBtn{
+                background: red;
+                color: #fff;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: bold;
+                flex-shrink: 0; /* 防止按钮被压缩 */
+            }
+            /* 确认按钮容器（单独占一行居中） */
+            .fixUI_PopupUI_confirmBtns{
+                margin-top: 10px;
+                display:flex;
+                flex-direction: row;         /* 横向排列按钮 */
+                justify-content: center;     /* 居中 */
+                gap:10px;
+                width: 100%;
+            }
+            .fixUI_PopupUI_confirmBtns button{
+                background:#444;
+                color:#fff;
+                border:none;
+                padding:5px 10px;
+                border-radius:3px;
+                cursor:pointer;
+            }
+        `;
+            targetDoc.head.appendChild(styleEl);
+        }
+
+        // 容器
+        let container = targetDoc.getElementById('fixUI_PopupUI_container');
+        if (!container) {
+            container = targetDoc.createElement('div');
+            container.id = 'fixUI_PopupUI_container';
+            Object.assign(container.style, {
+                position: 'fixed',
+                top: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+                zIndex: 99999
+            });
+            targetDoc.body.appendChild(container);
+        }
+
+        return container;
+
+    }
+
     //移除弹窗
     function fixUI_PopupUI_removeBox(box) {
         box.classList.add('fixUI_PopupUI_fadeout');
@@ -1229,8 +1353,10 @@
 
     //构建alert弹窗
     function fixUI_PopupUI_showAlert(msg, type = 'info', timeout = 5000) {
-        fixUI_PopupUI_injectStyles();
-        const container = fixUI_PopupUI_ensureContainer();
+        // fixUI_PopupUI_injectStyles();
+        // const container = fixUI_PopupUI_ensureContainer();
+        const container = fixUI_PopupUI_initContainerAndCSS();
+        debugger
         const box = document.createElement('div');
         box.className = `fixUI_PopupUI_box fixUI_PopupUI_${type}`;
 
@@ -1262,9 +1388,11 @@
 
     //构建confirm弹窗
     function fixUI_PopupUI_showConfirm(msg) {
-        fixUI_PopupUI_injectStyles();
+        // fixUI_PopupUI_injectStyles();
         return new Promise(resolve => {
-            const container = fixUI_PopupUI_ensureContainer();
+            // const container = fixUI_PopupUI_ensureContainer();
+            const container = fixUI_PopupUI_initContainerAndCSS();
+            debugger
             const box = document.createElement('div');
             box.className = `fixUI_PopupUI_box fixUI_PopupUI_info`;
             box.textContent = msg;
@@ -2507,19 +2635,11 @@
             let window_width = window.innerWidth;
             console.log("[SCUT Finance Helper]currentUrl " + currentUrl + " 当前宽度为: " + window_width + "px");
 
-            fixUI_PopupUI_ensureContainer();//创建弹出窗口的容器
-            fixUI_PopupUI_injectStyles();//创建弹出窗口条目的css
-
-           
-            // fixUI_PopupUI_showAlert("45333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333366123info","info",2000000);
-            // fixUI_PopupUI_showAlert("123success","success",2000000);
-            // fixUI_PopupUI_showAlert("123warning","warning",2000000);
-            // fixUI_PopupUI_showAlert("123error","error",2000000);
+            // fixUI_PopupUI_ensureContainer();//创建弹出窗口的容器
+            // fixUI_PopupUI_injectStyles();//创建弹出窗口条目的css
 
 
 
-
-            // fixUI_PopupUI_showConfirm("45333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333366");
 
             //判断是否使能 覆写弹窗功能(跳过弹窗)
             // if (tampermonkeyuserConfig.enable_OnlineReimbursement_OverridePopup) {
@@ -2530,6 +2650,14 @@
                 hookAllFrames();
             }, 1000);
             // }
+
+
+            fixUI_PopupUI_showAlert("showAlert info 45333333333333333333333333333333333333333333333333333333333366123info", "info", 2000000);
+            // fixUI_PopupUI_showAlert("123success", "success", 2000000);
+            // fixUI_PopupUI_showAlert("123warning", "warning", 2000000);
+            // fixUI_PopupUI_showAlert("123error", "error", 2000000);
+            fixUI_PopupUI_showConfirm("showConfirm 45333333333333333333333333333333333333333333333333333333333333333366");
+
 
             //判断是否使能 批量删除发票功能
             if (tampermonkeyuserConfig.enableAuto_OnlineReimbursement_BatchDeleteInvoice) {
