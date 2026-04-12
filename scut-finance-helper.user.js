@@ -2,7 +2,7 @@
 // @name         SCUT Finance Helper
 // @name:zh      SCUT财务系统小助手
 // @namespace    https://github.com/xana2333/scut-finance-ui-fix
-// @version      1.0.11
+// @version      1.0.12
 // @description  SCUT网上报账系统 & 财务查询系统辅助小工具：UI修正功能、自动化批量操作，让报账更高效流畅。
 // @author       XANA
 // @homepage     https://github.com/xana2333/scut-finance-ui-fix
@@ -30,18 +30,18 @@
     /** ==== 持久化配置文件相关 ==== **/
     const CONFIG_KEY = 'tampermonkeyuserConfig';
     const defaultConfig = {
-        enable_OnlineReimbursement_OverridePopup: true,                              // 网上报账系统-覆写弹窗功能(跳过弹窗)
+        enable_OnlineReimbursement_OverridePopup: false,                              // 网上报账系统-覆写弹窗功能(跳过弹窗)
 
-        enableAuto_OnlineReimbursement_BatchDeleteInvoice: true,                     // 网上报账系统-批量删除发票功能
-        enableAuto_OnlineReimbursement_BatchInvoiceBindingToggle: true,              // 网上报账系统-批量绑定/取消绑定发票功能
-        enableAuto_OnlineReimbursement_SelectAddedFundsInDailyReimbursement: true,   // 网上报账系统-自动选中日常报销中已添加经费
+        enableAuto_OnlineReimbursement_BatchDeleteInvoice: false,                     // 网上报账系统-批量删除发票功能
+        enableAuto_OnlineReimbursement_BatchInvoiceBindingToggle: false,              // 网上报账系统-批量绑定/取消绑定发票功能
+        enableAuto_OnlineReimbursement_SelectAddedFundsInDailyReimbursement: false,   // 网上报账系统-自动选中日常报销中已添加经费
 
-        enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight: true,            // 修正网上报账系统UI-税票录入页面高度问题
-        enablefixUI_OnlineReimbursement_ProjectSelectPageTableHeight: true,         // 修正网上报账系统UI-项目选择（经费选择）页面表格高度问题
-        enablefixUI_OnlineReimbursement_ExpenseDetailPageTableHeight: true,         // 修正网上报账系统UI-费用明细页面表格高度问题
+        enablefixUI_OnlineReimbursement_TaxInvoiceEntryPageHeight: false,            // 修正网上报账系统UI-税票录入页面高度问题
+        enablefixUI_OnlineReimbursement_ProjectSelectPageTableHeight: false,         // 修正网上报账系统UI-项目选择（经费选择）页面表格高度问题
+        enablefixUI_OnlineReimbursement_ExpenseDetailPageTableHeight: false,         // 修正网上报账系统UI-费用明细页面表格高度问题
 
-        enablefixUI_FinanceQuery_UiMisalignment: true,           // 修正财务查询系统UI-首页表格错位问题
-        enablefixUI_FinanceQuery_TableCannotExpandFully: true    // 修正财务查询系统UI-表格无法完全展开问题
+        enablefixUI_FinanceQuery_UiMisalignment: false,           // 修正财务查询系统UI-首页表格错位问题
+        enablefixUI_FinanceQuery_TableCannotExpandFully: false    // 修正财务查询系统UI-表格无法完全展开问题
     };
 
     // 功能描述，用于菜单显示
