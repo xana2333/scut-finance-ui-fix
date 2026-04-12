@@ -2524,7 +2524,7 @@
         const targetIframe = document.getElementById('ctl00_ContentPlaceHolder1_fm_wx');
         if (targetIframe && targetIframe.tagName.toLowerCase() === 'iframe') {
             const sizeInfo = getIframeSize(targetIframe);
-            console.log("iframe id=" + targetIframe.id + '的height: ' + sizeInfo + "px");
+            console.log("iframe id=" + targetIframe.id + '的height: ' + sizeInfo.height + "px");
 
             const newIframeHeight = sizeInfo.height < 901 ? 950 : sizeInfo.height + 50;
             //console.log(newIframeHeight+"px");
